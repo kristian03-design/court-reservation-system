@@ -12,8 +12,12 @@ class SettingController extends Controller
 {
     public function index(): View
     {
-        return view('admin.settings.index', [
-            'settings' => FacilitySetting::pluck('value', 'key'),
+        $settings = \Illuminate\Support\Facades\Cache::rememberForever('facility_settings', function () {
+            return FacilitySetting::pluck('value', 'key');
+        });
+
+        return view('admin.settings.admin-settings', [
+            'settings' => $settings,
         ]);
     }
 
@@ -30,6 +34,8 @@ class SettingController extends Controller
         foreach ($data as $key => $value) {
             FacilitySetting::updateOrCreate(['key' => $key], ['value' => $value]);
         }
+
+        \Illuminate\Support\Facades\Cache::forget('facility_settings');
 
         return back()->with('success', 'Settings saved.');
     }

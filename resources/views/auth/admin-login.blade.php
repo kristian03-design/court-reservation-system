@@ -1,6 +1,6 @@
 @php
     $logoCandidates = ['images/courtconnect-mark.png', 'images/courtconnect-logo.svg', 'images/courtconnect-logo.png', 'courtconnect-logo.svg', 'courtconnect-logo.png'];
-    $logo = collect($logoCandidates)->first(fn ($path) => file_exists(public_path($path)));
+    $layoutLogo = collect($logoCandidates)->first(fn ($path) => file_exists(public_path($path)));
 @endphp
 
 <!doctype html>
@@ -10,73 +10,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin Login | CourtConnect</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/css/views/admin.css', 'resources/js/app.js'])
+    <link rel="icon" href="{{ asset('images/courtconnect-mark.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/css/views/guest.css', 'resources/js/app.js'])
 </head>
-<body class="admin-login-body">
-    <main class="admin-login-page">
-        <section class="admin-login-shell">
-            <div class="admin-login-panel">
-                <a href="{{ route('home') }}" class="brand">
-                    @if ($logo)
-                        <span class="brand-mark">
-                            <img src="{{ asset($logo) }}" alt="CourtConnect logo">
-                        </span>
-                    @else
-                        <span class="brand-fallback">CC</span>
-                    @endif
-                    <span>
-                        <span class="brand-name">CourtConnect</span>
-                        <span class="brand-tagline">Reserve. Play. Connect.</span>
-                    </span>
-                </a>
+<body class="public-page padele-home padele-inner auth-page">
+    <main>
+        @include('partials.toast')
 
-                <p class="admin-eyebrow">Admin Portal</p>
-                <h1 class="admin-title">Manage courts, bookings, payments, and facility operations.</h1>
-                <p class="admin-copy">This entrance is restricted to administrator accounts. Customer accounts should use the regular login page.</p>
+        <section class="auth-shell site-container">
+            <div class="auth-copy">
+                <p class="cc-kicker">Admin Portal</p>
+                <h1>Sign in to manage facility operations</h1>
+                <p>Manage courts, bookings, payments, schedules, and reports from the administrator workspace.</p>
+                <div class="auth-pills">
+                    <span>Admin OTP</span>
+                    <span>Bookings</span>
+                    <span>Payments</span>
+                </div>
             </div>
 
-            <div class="admin-login-form-wrap">
-                <h2 class="form-title">Admin Login</h2>
-                <p class="form-copy">Sign in with an active administrator account. A one-time code will be sent to the admin email.</p>
-
-                @if ($errors->any())
-                    <div class="form-alert">
-                        @foreach ($errors->all() as $error)
-                            <div>{{ $error }}</div>
-                        @endforeach
-                    </div>
-                @endif
-
-                <form class="admin-form" method="POST" action="{{ route('admin.login.store') }}">
+            <section class="auth-card">
+                <div class="auth-card-head">
+                    <p>Administrator access</p>
+                    <h2>Admin Login</h2>
+                </div>
+                <form class="auth-form" method="POST" action="{{ route('admin.login.store') }}">
                     @csrf
-                    <label class="form-label">
-                        Email
-                        <input class="form-input" type="email" name="email" value="{{ old('email') }}" required autofocus>
+                    <label><span class="auth-label-text"><i data-lucide="mail" aria-hidden="true"></i>Email</span>
+                        <input type="email" name="email" value="{{ old('email') }}" placeholder="e.g. admin@example.com" required autofocus>
                     </label>
-
-                    <label class="form-label">
-                        Password
-                        <input class="form-input" type="password" name="password" required>
+                    <label><span class="auth-label-text"><i data-lucide="lock-keyhole" aria-hidden="true"></i>Password</span>
+                        <div class="password-input-wrap">
+                            <input type="password" name="password" id="password" placeholder="••••••••" required>
+                            <button type="button" class="toggle-password" data-target="password" aria-label="Toggle password visibility">
+                                <i data-lucide="eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </label>
-
-                    <div class="form-row">
-                        <label class="remember">
-                            <input type="checkbox" name="remember">
-                            Remember me
-                        </label>
-                        <a href="{{ route('password.request') }}">Forgot password?</a>
+                    <div class="auth-form-row">
+                        <label class="auth-check"><input type="checkbox" name="remember"> Remember me</label>
+                        <a href="{{ route('password.request') }}"><i data-lucide="key-round" class="mr-2" aria-hidden="true"></i>Forgot password?</a>
                     </div>
-
-                    <button class="submit-button" type="submit">Send Admin OTP</button>
+                    <button class="btn btn-primary" type="submit"><i data-lucide="send" class="mr-2" aria-hidden="true"></i>Send Admin OTP</button>
                 </form>
-
-                <a class="back-link" href="{{ route('login') }}">Use customer login</a>
-            </div>
+            </section>
         </section>
     </main>
+
+    @stack('scripts')
 </body>
 </html>

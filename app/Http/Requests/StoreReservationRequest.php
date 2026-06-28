@@ -19,7 +19,7 @@ class StoreReservationRequest extends FormRequest
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
             'players' => ['required', 'integer', 'min:1', 'max:100'],
-            'payment_method' => ['required', 'in:paymongo,gcash_upload,pay_at_venue'],
+            'payment_method' => ['required', 'in:pay_at_venue,gcash,maya,card,bank_transfer'],
             'notes' => ['nullable', 'string', 'max:500'],
         ];
     }

@@ -10,104 +10,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Reset Password | CourtConnect</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{ asset('images/courtconnect-mark.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/css/views/guest.css', 'resources/js/app.js'])
 </head>
-<body>
-    <header class="site-header">
-        <div class="site-container site-nav">
-            <a href="{{ route('home') }}" class="brand">
-                @if ($layoutLogo)
-                    <span class="brand-mark"><img src="{{ asset($layoutLogo) }}" alt="CourtConnect logo"></span>
-                @else
-                    <span class="brand-fallback">CC</span>
-                @endif
-                <span><span class="brand-name">CourtConnect</span><span class="brand-tagline">Reserve. Play. Connect.</span></span>
-            </a>
-            <nav class="site-menu">
-                <a href="{{ route('home') }}">Home</a>
-                <a href="{{ route('courts.index') }}">Courts</a>
-                <a href="{{ route('home') }}#pricing">Pricing</a>
-                <a href="{{ route('about') }}">About</a>
-                <a href="{{ route('contact') }}">Contact</a>
-            </nav>
-            <div class="site-actions">
-                @auth
-                    <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('dashboard') }}" class="btn btn-outline">Dashboard</a>
-                @else
-                    <a href="{{ route('login') }}" class="btn btn-outline">Login</a>
-                    <a href="{{ route('register') }}" class="btn btn-secondary">Register</a>
-                @endauth
-            </div>
-        </div>
-    </header>
+<body class="public-page padele-home padele-inner auth-page">
+    @include('partials.public-header')
     <main>
-        @if (session('success') || $errors->any())
-            <div class="site-container alert-wrap">
-                <div class="alert {{ session('success') ? 'alert-success' : 'alert-error' }}">
-                    @if (session('success'))
-                        {{ session('success') }}
-                    @else
-                        <strong>Please check the highlighted fields.</strong>
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    @endif
+        @include('partials.toast')
+
+        <section class="auth-shell site-container">
+            <div class="auth-copy">
+                <p class="cc-kicker">New password</p>
+                <h1>Create a fresh password for your account</h1>
+                <p>Choose a new password, then return to your reservations and court schedule.</p>
+                <div class="auth-pills">
+                    <span>Secure update</span>
+                    <span>Account access</span>
+                    <span>Booking ready</span>
                 </div>
             </div>
-        @endif
-        <section class="mx-auto max-w-xl px-4 py-16 sm:px-6 lg:px-8">
-        <section class="card">
-            <h1 class="text-3xl font-bold text-[#0F2447]">Create a new password</h1>
-            <form class="mt-6 grid gap-5" method="POST" action="{{ route('password.store') }}">
-                @csrf
-                <input type="hidden" name="token" value="{{ $request->route('token') }}">
-                <label class="grid gap-2 text-sm font-semibold">Email
-                    <input class="rounded-lg border border-[#E5E7EB] px-4 py-3 font-normal" type="email" name="email" value="{{ old('email', $request->email) }}" required>
-                </label>
-                <label class="grid gap-2 text-sm font-semibold">Password
-                    <input class="rounded-lg border border-[#E5E7EB] px-4 py-3 font-normal" type="password" name="password" required>
-                </label>
-                <label class="grid gap-2 text-sm font-semibold">Confirm Password
-                    <input class="rounded-lg border border-[#E5E7EB] px-4 py-3 font-normal" type="password" name="password_confirmation" required>
-                </label>
-                <button type="submit" class="btn btn-secondary">Update Password</button>
-            </form>
+
+            <section class="auth-card">
+                <div class="auth-card-head">
+                    <p>Password update</p>
+                    <h2>Reset Password</h2>
+                </div>
+                <form class="auth-form" method="POST" action="{{ route('password.store') }}">
+                    @csrf
+                    <input type="hidden" name="token" value="{{ $request->route('token') }}">
+                    <label><span class="auth-label-text"><i data-lucide="mail" aria-hidden="true"></i>Email</span>
+                        <input type="email" name="email" value="{{ old('email', $request->email) }}" placeholder="e.g. user@example.com" required>
+                    </label>
+                    <label><span class="auth-label-text"><i data-lucide="lock-keyhole" aria-hidden="true"></i>Password</span>
+                        <div class="password-input-wrap">
+                            <input type="password" name="password" id="password" placeholder="••••••••" required minlength="8">
+                            <button type="button" class="toggle-password" data-target="password" aria-label="Toggle password visibility">
+                                <i data-lucide="eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </label>
+                    <label><span class="auth-label-text"><i data-lucide="shield-check" aria-hidden="true"></i>Confirm Password</span>
+                        <div class="password-input-wrap">
+                            <input type="password" name="password_confirmation" id="password_confirmation" placeholder="••••••••" required minlength="8">
+                            <button type="button" class="toggle-password" data-target="password_confirmation" aria-label="Toggle confirm password visibility">
+                                <i data-lucide="eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </label>
+                    <button type="submit" class="btn btn-primary"><i data-lucide="refresh-cw" class="mr-2" aria-hidden="true"></i>Update Password</button>
+                </form>
+                <a class="auth-switch" href="{{ route('login') }}"><i data-lucide="log-in" class="mr-2" aria-hidden="true"></i>Back to login</a>
+            </section>
         </section>
-    </section>
     </main>
-    <footer class="site-footer">
-        <div class="site-container footer-grid">
-            <div>
-                <a href="{{ route('home') }}" class="brand">
-                    @if ($layoutLogo)
-                        <span class="brand-mark"><img src="{{ asset($layoutLogo) }}" alt="CourtConnect logo"></span>
-                    @else
-                        <span class="brand-fallback">CC</span>
-                    @endif
-                    <span><span class="brand-name">CourtConnect</span><span class="brand-tagline">Reserve. Play. Connect.</span></span>
-                </a>
-                <p class="footer-copy">Reserve. Play. Connect. A modern reservation platform for sports facilities and recreational centers.</p>
-            </div>
-            <div>
-                <h3 class="footer-title">Quick Links</h3>
-                <div class="footer-links">
-                    <a href="{{ route('courts.index') }}">Courts</a>
-                    <a href="{{ route('about') }}">About</a>
-                    <a href="{{ route('contact') }}">Contact</a>
-                </div>
-            </div>
-            <div>
-                <h3 class="footer-title">Contact</h3>
-                <p class="footer-contact">hello@courtconnect.test<br>+63 900 123 4567</p>
-            </div>
-        </div>
-    </footer>
+
+    @include('partials.public-footer')
     @stack('scripts')
 </body>
 </html>

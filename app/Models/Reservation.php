@@ -43,4 +43,15 @@ class Reservation extends Model
     {
         return $this->hasOne(Payment::class);
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereIn('status', ['pending_payment', 'confirmed', 'completed'])
+              ->orWhere(function ($sub) {
+                  $sub->where('status', 'held')
+                      ->where('created_at', '>=', now()->subMinutes(10));
+              });
+        });
+    }
 }

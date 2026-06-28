@@ -11,10 +11,16 @@ class DashboardController extends Controller
 {
     public function __invoke(ReportService $reportService): View
     {
-        return view('admin.dashboard', [
+        $courts = \App\Models\Court::with(['reservations' => function ($q) {
+            $q->whereDate('reservation_date', today())
+              ->whereIn('status', ['approved', 'completed', 'pending']);
+        }])->get();
+
+        return view('admin.admin-dashboard', [
             'stats' => $reportService->dashboardStats(),
             'statusBreakdown' => $reportService->bookingStatus(),
             'recentReservations' => Reservation::with(['court', 'user', 'payment'])->latest()->take(8)->get(),
+            'courts' => $courts,
         ]);
     }
 }

@@ -15,13 +15,19 @@ use Throwable;
 
 class AuthenticatedSessionController extends Controller
 {
-    public function create(): View
+    public function create(Request $request): View|RedirectResponse
     {
+        if (Auth::guard('web')->check()) {
+            return redirect()->route('dashboard');
+        }
         return view('auth.login');
     }
 
-    public function createAdmin(): View
+    public function createAdmin(Request $request): View|RedirectResponse
     {
+        if (Auth::guard('admin')->check()) {
+            return redirect()->route('admin.dashboard');
+        }
         return view('auth.admin-login');
     }
 
@@ -34,17 +40,41 @@ class AuthenticatedSessionController extends Controller
 
         $remember = $request->boolean('remember');
 
-        if (! Auth::attempt($credentials, $remember)) {
+        $throttleKey = \Illuminate\Support\Str::transliterate(\Illuminate\Support\Str::lower($credentials['email']).'|'.$request->ip());
+
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($throttleKey);
             throw ValidationException::withMessages([
-                'email' => 'These credentials do not match our records.',
+                'email' => "Too many login attempts. Please try again in {$seconds} seconds.",
             ]);
         }
 
+        $user = User::where('email', $credentials['email'])->first();
+
+        if ($user?->isAdmin()) {
+            throw ValidationException::withMessages([
+                'email' => 'Admin accounts must use the admin login page.',
+            ]);
+        }
+
+        if (! Auth::guard('web')->attempt($credentials, $remember)) {
+            \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 300); // 5 min lockout
+
+            // Log security attempt
+            Log::channel('security')->warning('Failed login attempt.', [
+                'email' => $credentials['email'],
+                'ip' => $request->ip()
+            ]);
+
+            throw ValidationException::withMessages([
+                'email' => 'Incorrect email or password. Please try again.',
+            ]);
+        }
+
+        \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
         $request->session()->regenerate();
 
-        $route = $request->user()->isAdmin() ? 'admin.dashboard' : 'dashboard';
-
-        return redirect()->intended(route($route));
+        return redirect()->route('dashboard');
     }
 
     public function storeAdmin(Request $request): RedirectResponse
@@ -54,19 +84,35 @@ class AuthenticatedSessionController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        $admin = User::where('email', $credentials['email'])->first();
+        $throttleKey = \Illuminate\Support\Str::transliterate('admin_login|'.\Illuminate\Support\Str::lower($credentials['email']).'|'.$request->ip());
 
-        if (! $admin || ! Auth::validate($credentials)) {
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($throttleKey);
             throw ValidationException::withMessages([
-                'email' => 'These admin credentials do not match our records.',
+                'email' => "Too many admin login attempts. Please try again in {$seconds} seconds.",
             ]);
         }
 
-        if (! $admin->isAdmin() || ! $admin->isActive()) {
+        $admin = User::where('email', $credentials['email'])->first();
+
+        if (! $admin || ! Auth::guard('admin')->validate($credentials)) {
+            \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 300);
+            Log::channel('security')->warning('Failed admin login attempt.', [
+                'email' => $credentials['email'],
+                'ip' => $request->ip()
+            ]);
+            throw ValidationException::withMessages([
+                'email' => 'Incorrect admin email or password. Please try again.',
+            ]);
+        }
+
+        if (! $admin->isAllowedAdminPanel() || ! $admin->isActive()) {
             throw ValidationException::withMessages([
                 'email' => 'This account is not allowed to access the admin panel.',
             ]);
         }
+
+        \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
 
         $otp = (string) random_int(100000, 999999);
 
@@ -126,6 +172,15 @@ class AuthenticatedSessionController extends Controller
                 ->withErrors(['otp' => 'Please login again to request a new admin OTP.']);
         }
 
+        $throttleKey = 'admin_otp|'.$userId.'|'.$request->ip();
+
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 3)) {
+            $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($throttleKey);
+            throw ValidationException::withMessages([
+                'otp' => "Too many incorrect OTP attempts. Please wait {$seconds} seconds before trying again.",
+            ]);
+        }
+
         if (now()->timestamp > $expiresAt) {
             $this->forgetAdminOtp($request);
 
@@ -134,34 +189,60 @@ class AuthenticatedSessionController extends Controller
         }
 
         if (! hash_equals($expectedOtp, $data['otp'])) {
+            \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 300);
+            Log::channel('security')->warning('Incorrect OTP entered for admin.', [
+                'user_id' => $userId,
+                'ip' => $request->ip()
+            ]);
             throw ValidationException::withMessages([
                 'otp' => 'The admin OTP is incorrect.',
             ]);
         }
 
+        \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
+
         $admin = User::find($userId);
 
-        if (! $admin || ! $admin->isAdmin() || ! $admin->isActive()) {
+        if (! $admin || ! $admin->isAllowedAdminPanel() || ! $admin->isActive()) {
             $this->forgetAdminOtp($request);
 
             return redirect()->route('admin.login')
                 ->withErrors(['email' => 'This account is not allowed to access the admin panel.']);
         }
 
-        Auth::login($admin, (bool) $request->session()->get('admin_otp_remember'));
+        Auth::guard('admin')->login($admin, (bool) $request->session()->get('admin_otp_remember'));
         $request->session()->regenerate();
         $this->forgetAdminOtp($request);
 
-        return redirect()->intended(route('admin.dashboard'));
+        return redirect()->route('admin.dashboard');
     }
 
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+
+        if (! Auth::guard('admin')->check()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        } else {
+            $request->session()->regenerate();
+        }
 
         return redirect()->route('home');
+    }
+
+    public function destroyAdmin(Request $request): RedirectResponse
+    {
+        Auth::guard('admin')->logout();
+
+        if (! Auth::guard('web')->check()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        } else {
+            $request->session()->regenerate();
+        }
+
+        return redirect()->route('admin.login');
     }
 
     private function forgetAdminOtp(Request $request): void

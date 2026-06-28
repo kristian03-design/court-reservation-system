@@ -27,11 +27,11 @@ class DatabaseSeeder extends Seeder
         );
 
         User::updateOrCreate(
-            ['email' => 'hkristianlloyd2@gmail.com'],
+            ['email' => 'courtconnect2026@gmail.com'],
             [
-                'name' => 'HKristian Lloyd',
-                'phone' => '+63 900 000 0001',
-                'password' => Hash::make('admin123'),
+                'name' => 'CourtConnect 2026',
+                'phone' => '+63 900 000 2026',
+                'password' => Hash::make('courtconnect2026'),
                 'role' => 'admin',
                 'status' => 'active',
                 'email_verified_at' => now(),
@@ -51,11 +51,11 @@ class DatabaseSeeder extends Seeder
         );
 
         $courts = collect([
-            ['court_name' => 'Peak Basketball Court', 'court_type' => 'Basketball', 'capacity' => 10, 'hourly_rate' => 950, 'image' => 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80'],
-            ['court_name' => 'Velocity Volleyball Arena', 'court_type' => 'Volleyball', 'capacity' => 12, 'hourly_rate' => 850, 'image' => 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?auto=format&fit=crop&w=1200&q=80'],
-            ['court_name' => 'Swift Badminton Hall', 'court_type' => 'Badminton', 'capacity' => 4, 'hourly_rate' => 420, 'image' => 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80'],
-            ['court_name' => 'Baseline Tennis Court', 'court_type' => 'Tennis', 'capacity' => 4, 'hourly_rate' => 720, 'image' => 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=1200&q=80'],
-            ['court_name' => 'Urban Futsal Pitch', 'court_type' => 'Futsal', 'capacity' => 10, 'hourly_rate' => 1100, 'image' => 'https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=1200&q=80'],
+            ['court_name' => 'Peak Basketball Court', 'court_type' => 'Basketball', 'capacity' => 10, 'hourly_rate' => 950, 'image' => '/images/courtconnect-basketball-court.png'],
+            ['court_name' => 'Velocity Volleyball Arena', 'court_type' => 'Volleyball', 'capacity' => 12, 'hourly_rate' => 850, 'image' => '/images/courtconnect-volleyball-court.png'],
+            ['court_name' => 'Swift Badminton Hall', 'court_type' => 'Badminton', 'capacity' => 4, 'hourly_rate' => 420, 'image' => '/images/courtconnect-badminton-court.png'],
+            ['court_name' => 'Baseline Tennis Court', 'court_type' => 'Tennis', 'capacity' => 4, 'hourly_rate' => 720, 'image' => '/images/courtconnect-tennis-court.png'],
+            ['court_name' => 'Urban Futsal Pitch', 'court_type' => 'Futsal', 'capacity' => 10, 'hourly_rate' => 1100, 'image' => '/images/courtconnect-futsal-pitch.png'],
         ])->map(function (array $court) {
             return Court::updateOrCreate(
                 ['court_name' => $court['court_name']],

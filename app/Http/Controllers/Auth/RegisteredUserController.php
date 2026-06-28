@@ -16,8 +16,11 @@ use Throwable;
 
 class RegisteredUserController extends Controller
 {
-    public function create(): View
+    public function create(Request $request): View|RedirectResponse
     {
+        if (Auth::guard('web')->check()) {
+            return redirect()->route('dashboard');
+        }
         return view('auth.register');
     }
 
@@ -39,17 +42,30 @@ class RegisteredUserController extends Controller
             'status' => 'active',
         ]);
 
+        if (app()->environment('local')) {
+            $user->markEmailAsVerified();
+        } else {
+            try {
+                event(new Registered($user));
+            } catch (Throwable $exception) {
+                Log::warning('Registration verification email could not be sent.', [
+                    'user_id' => $user->id,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
         try {
-            event(new Registered($user));
+            $user->notify(new \App\Notifications\WelcomeNotification());
         } catch (Throwable $exception) {
-            Log::warning('Registration verification email could not be sent.', [
+            Log::warning('Welcome email could not be sent.', [
                 'user_id' => $user->id,
                 'error' => $exception->getMessage(),
             ]);
         }
 
-        Auth::login($user);
+        // Auth::guard('web')->login($user);
 
-        return redirect()->route('verification.notice');
+        return redirect()->route('login')->with('success', 'Registration successful! Please log in to your new account.');
     }
 }

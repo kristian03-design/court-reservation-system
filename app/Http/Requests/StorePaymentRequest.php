@@ -15,6 +15,7 @@ class StorePaymentRequest extends FormRequest
     {
         return [
             'proof_image' => ['required', 'image', 'max:4096'],
+            'reference_number' => ['required', 'string', 'max:100'],
         ];
     }
 }

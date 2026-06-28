@@ -1,8 +1,3 @@
-@php
-    $logoCandidates = ['images/courtconnect-mark.png', 'images/courtconnect-logo.svg', 'images/courtconnect-logo.png', 'courtconnect-logo.svg', 'courtconnect-logo.png'];
-    $layoutLogo = collect($logoCandidates)->first(fn ($path) => file_exists(public_path($path)));
-@endphp
-
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -10,62 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Verify Email | CourtConnect</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/css/views/user.css', 'resources/js/app.js'])
+    <link rel="icon" href="{{ asset('images/courtconnect-mark.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/css/views/guest.css', 'resources/js/app.js'])
 </head>
-<body>
-    <header class="site-header">
-        <div class="site-container site-nav">
-            <a href="{{ route('home') }}" class="brand">
-                @if ($layoutLogo)
-                    <span class="brand-mark"><img src="{{ asset($layoutLogo) }}" alt="CourtConnect logo"></span>
-                @else
-                    <span class="brand-fallback">CC</span>
-                @endif
-                <span><span class="brand-name">CourtConnect</span><span class="brand-tagline">Reserve. Play. Connect.</span></span>
-            </a>
-            <nav class="site-menu">
-                <a href="{{ route('home') }}">Home</a>
-                <a href="{{ route('courts.index') }}">Courts</a>
-                <a href="{{ route('booking.create') }}">Book</a>
-                <a href="{{ route('dashboard') }}">Dashboard</a>
-            </nav>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                @method('DELETE')
-                <button class="btn btn-outline" type="submit">Logout</button>
-            </form>
-        </div>
-    </header>
-    <main class="main-shell">
-        <div class="site-container">
-            @if (session('success') || $errors->any())
-                <div class="alert {{ session('success') ? 'alert-success' : 'alert-error' }}">
-                    @if (session('success'))
-                        {{ session('success') }}
-                    @else
-                        <strong>Please check the highlighted fields.</strong>
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    @endif
+<body class="public-page padele-home padele-inner auth-page">
+    @include('partials.public-header')
+
+    <main>
+        @include('partials.toast')
+
+        <section class="auth-shell site-container">
+            <div class="auth-copy">
+                <p class="cc-kicker">Verify email</p>
+                <h1>Confirm your email to start booking courts</h1>
+                <p>A verification link has been sent to your email address. Verify your account to unlock booking and payment features.</p>
+                <div class="auth-pills">
+                    <span>Email check</span>
+                    <span>Bookings</span>
+                    <span>Payments</span>
                 </div>
-            @endif
-            <div class="content-space"><section class="card mx-auto max-w-2xl">
-        <h1 class="text-3xl font-bold text-[#0F2447]">Verify your email</h1>
-        <p class="mt-4 leading-7 text-[#64748B]">A verification link has been sent to your email address. Verify your account to start booking courts.</p>
-        <form class="mt-6" method="POST" action="{{ route('verification.send') }}">
-            @csrf
-            <button type="submit" class="btn btn-secondary">Resend Verification Link</button>
-        </form>
-    </section></div>
-        </div>
+            </div>
+
+            <section class="auth-card">
+                <div class="auth-card-head">
+                    <p>Account verification</p>
+                    <h2>Verify Email</h2>
+                </div>
+                <form class="auth-form" method="POST" action="{{ route('verification.send') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-primary"><i data-lucide="send" aria-hidden="true"></i>Resend Verification Link</button>
+                </form>
+            </section>
+        </section>
     </main>
+    @include('partials.public-footer')
     @stack('scripts')
 </body>
 </html>

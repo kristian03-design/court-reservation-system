@@ -10,7 +10,7 @@ class HomeController extends Controller
 {
     public function __invoke(): View
     {
-        return view('pages.home', [
+        return view('guest.guest-homepage', [
             'courts' => Court::available()->latest()->take(5)->get(),
             'testimonials' => Testimonial::where('is_featured', true)->take(3)->get(),
         ]);

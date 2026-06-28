@@ -38,8 +38,48 @@ class Court extends Model
         return $this->hasMany(CourtSchedule::class);
     }
 
+    public function isOccupiedNow(): bool
+    {
+        if ($this->status !== 'available') {
+            return true;
+        }
+
+        $now = now();
+        $time = $now->toTimeString();
+        $date = $now->toDateString();
+
+        $blockedSchedule = $this->schedules()
+            ->whereDate('schedule_date', $date)
+            ->whereIn('availability_status', ['reserved', 'maintenance', 'closed'])
+            ->where('start_time', '<=', $time)
+            ->where('end_time', '>', $time)
+            ->exists();
+
+        if ($blockedSchedule) {
+            return true;
+        }
+
+        return $this->reservations()
+            ->whereDate('reservation_date', $date)
+            ->active()
+            ->where('start_time', '<=', $time)
+            ->where('end_time', '>', $time)
+            ->exists();
+    }
+
     public function scopeAvailable($query)
     {
         return $query->where('status', 'available');
+    }
+
+    protected static function booted()
+    {
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::flush();
+        });
+
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::flush();
+        });
     }
 }

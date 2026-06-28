@@ -1,0 +1,134 @@
+COURTCONNECT IMAGE GENERATION PROMPTS
+=====================================
+A complete set of high-quality image generation prompts for all of the court gallery images 
+defined in gallery.json. Optimized for Midjourney, DALL-E 3, or Stable Diffusion.
+Theme constraints: Modern black interiors, vertical wood wall panels, warm glowing ambient lighting, and completely vacant (no people, players, or silhouettes).
+
+--------------------------------------------------------------------------------
+1. PEAK BASKETBALL COURT (BLACK + DARK WOOD + AMBER LED ACCENT)
+--------------------------------------------------------------------------------
+
+Filename: courtconnect-basketball-court.png (Main Hero View)
+Prompt:
+A wide-angle interior architectural photograph of a luxury indoor basketball court. Deep black modern walls with vertical dark walnut wood slat paneling, glowing warm amber LED light strips running vertically along the panels. Perfectly polished maple hardwood floor reflecting the overhead ambient lights. A professional basketball hoop with a glass backboard is prominent. Empty tiered spectator seating on the side. Elegant, clean, professional sports arena atmosphere, completely vacant with no people, players, or silhouettes. Midjourney v6 style, architectural rendering, 8k resolution, photorealistic.
+
+Filename: basketball-angle-2.png (Spectator View)
+Prompt:
+A professional empty indoor basketball court, absolutely no people, no players, no fans, no spectators, completely vacant. Cinematic perspective from the spectator seating side looking toward the court and basketball hoop. Modern black interior, vertical wood wall panels, warm ambient LED lighting, polished hardwood flooring with realistic reflections, premium arena seating, upper mezzanine level with glass railings. Photorealistic architectural render, magazine quality, wide-angle lens, 4K.
+
+Filename: basketball-corner.png (Corner Perspective)
+Prompt:
+A professional empty indoor basketball court, absolutely no people, no players, no fans, no spectators, completely vacant. Corner perspective view from the back corner of the court, showing both the polished hardwood court floor and the basketball hoop diagonally. Modern black interior, vertical wood wall panels, warm ambient LED lighting, empty black tiered spectator seating, and upper mezzanine level with glass railings. Photorealistic architectural render, magazine quality, wide-angle lens, 4K.
+
+Filename: basketball-center.png (Center Court Perspective)
+Prompt:
+A professional empty indoor basketball court, absolutely no people, no players, no fans, no spectators, completely vacant. Center court perspective with the camera positioned at center court facing the audience stands for a grand arena feel. Modern black interior, vertical wood wall panels, warm ambient LED lighting, polished hardwood floor with reflections, empty black tiered spectator seating. Photorealistic architectural render, magazine quality, wide-angle lens, 4K.
+
+Filename: basketball-low.png (Low-Angle Court View)
+Prompt:
+A professional empty indoor basketball court, absolutely no people, no players, no fans, no spectators, completely vacant. Low-angle court view with the camera placed near the floor, emphasizing the polished hardwood floor, realistic light reflections, and looking up towards the basketball ring and backboard. Modern black interior, vertical wood wall panels, warm ambient LED lighting. Photorealistic architectural render, magazine quality, wide-angle lens, 4K.
+
+Filename: basketball-balcony.png (Upper Balcony View)
+Prompt:
+A professional empty indoor basketball court, absolutely no people, no players, no fans, no spectators, completely vacant. Bird’s-eye perspective / high-angle balcony view from the mezzanine level overlooking the full empty court below. Modern black interior, vertical wood wall panels, warm ambient LED lighting, empty black tiered spectator seating. Photorealistic architectural render, magazine quality, wide-angle lens, 4K.
+
+Filename: basketball-behind.png (Behind the Hoop)
+Prompt:
+A professional empty indoor basketball court, absolutely no people, no players, no fans, no spectators, completely vacant. View from directly behind the backboard glass, looking through it across the empty court towards the audience seating and the rest of the arena. Modern black interior, vertical wood wall panels, warm ambient LED lighting. Photorealistic architectural render, magazine quality, wide-angle lens, 4K.
+
+Filename: basketball-pov.png (Player POV)
+Prompt:
+A professional empty indoor basketball court, absolutely no people, no players, no fans, no spectators, completely vacant. Player POV eye-level view from the free-throw line looking directly at the basketball hoop, backboard, and rim. Modern black interior, vertical wood wall panels, warm ambient LED lighting, empty spectator stands in the background. Photorealistic architectural render, magazine quality, wide-angle lens, 4K.
+
+Filename: basketball-entrance.png (Entrance Perspective)
+Prompt:
+A professional empty indoor basketball court, absolutely no people, no players, no fans, no spectators, completely vacant. View entering the arena through the entrance doors, showing the dramatic reveal of the court, premium wood paneling, polished hardwood floor, and glowing warm ambient LED lighting. Photorealistic architectural render, magazine quality, wide-angle lens, 4K.
+
+Filename: basketball-full.png (Full Court Perspective)
+Prompt:
+A professional empty indoor basketball court, absolutely no people, no players, no fans, no spectators, completely vacant. Wide-angle full court perspective shot from one baseline looking down the entire length of the court to the opposite hoop. Modern black interior, vertical wood wall panels, warm ambient LED lighting, empty black spectator seating on both sides, polished hardwood floor with clean line markings and realistic reflections. Photorealistic architectural render, magazine quality, wide-angle lens, 4K.
+
+
+--------------------------------------------------------------------------------
+2. VELOCITY VOLLEYBALL ARENA (BLACK + WOOD + NEON GREEN/WHITE LED)
+--------------------------------------------------------------------------------
+
+Filename: courtconnect-volleyball-court.png (Main Hero)
+Prompt:
+A premium indoor volleyball court inside a modern sports complex, completely empty with no people or players. Dark charcoal gray walls with vertical wooden slat paneling. A professional volleyball net is perfectly set up across the center. The floor is made of high-end dark blue and orange synthetic sports court flooring with clean white line markings. Overhead warm ambient LED light panels illuminate the court. Premium empty spectator seating on the far side. High-end, clean, architectural photography style, 8k, photorealistic.
+
+Filename: volleyball-angle-1.png (Low-Angle Net View)
+Prompt:
+A low-angle view from the floor of a professional empty volleyball court, looking through the volleyball net towards the opposite side. No people, vacant. Polished wooden or synthetic floor with clean court lines, dark gray wall background with vertical wood detailing, and glowing ambient warm LED strip lighting. Sharp focus, architectural visualization, photorealistic.
+
+Filename: volleyball-angle-2.png (Side-Line Perspective)
+Prompt:
+A side-line perspective of a luxury indoor volleyball court, completely vacant. Professional net in the center. The background features modern black walls, dark wood paneling, and empty premium spectator seating. Overhead architectural lighting casting soft reflections on the clean court floor. Architectural render style, wide angle, 4K, realistic.
+
+
+--------------------------------------------------------------------------------
+3. SWIFT BADMINTON HALL (BLACK + GREEN TURF/WOOD + WHITE LED)
+--------------------------------------------------------------------------------
+
+Filename: courtconnect-badminton-court.png (Main Hero)
+Prompt:
+A professional indoor badminton court with a premium green synthetic court mat. Modern minimalist design with deep black walls and vertical wood paneling. A badminton net is stretched tightly across the court. No players or people, completely vacant. Warm overhead light strips casting soft illumination. Photorealistic architectural photography, magazine style, 8k resolution.
+
+Filename: badminton-angle-1.png (Macro Equipment View)
+Prompt:
+A beautiful close-up shot of a professional badminton shuttlecock and two high-end carbon fiber rackets resting on a polished dark wood or green court floor. The court line markings are clean. The background shows a soft-focus view of the empty badminton net and dark wood paneling with warm ambient LED light. Depth of field, macro photography, luxury athletic aesthetic.
+
+Filename: badminton-angle-2.png (Diagonal Corner View)
+Prompt:
+A diagonal view from the corner of a luxury badminton court, vacant and empty. Clear lines on the green court mat, clean badminton net, dark gray acoustic walls with wood slat panels, glowing vertical LED lines. Wide-angle lens, architectural render, photorealistic.
+
+
+--------------------------------------------------------------------------------
+4. BASELINE TENNIS COURT (DEEP BLUE ACRYLIC + BLACK + ARCHED FRAME)
+--------------------------------------------------------------------------------
+
+Filename: courtconnect-tennis-court.png (Main Hero)
+Prompt:
+A luxury indoor tennis court with a deep blue acrylic surface and white court markings. Modern black industrial roof structure with elegant arched wooden frames. Professional net is set up across the center. No players or people. Warm ambient LED lighting strips accentuating the architecture. High-end athletic facility, clean, spacious. Photorealistic rendering, wide-angle lens, 8k.
+
+Filename: tennis-angle-1.png (Low-Angle Net View)
+Prompt:
+A dramatic low-angle perspective shot from the tennis net's base looking up the court towards the baseline. Deep blue tennis court floor, white lines, empty court. Modern black interior, vertical wooden acoustic panels, and warm glowing ambient lights in the background. Vacant, high-end look. Photorealistic.
+
+Filename: tennis-angle-2.png (Balcony Overlook)
+Prompt:
+A view of a premium indoor tennis court from an upper mezzanine gallery balcony with glass railings, looking down onto the empty blue court surface. Modern architecture with dark theme, vertical wood panels, and warm LED accent strips. Elegant sports club aesthetic, no people. Architectural render, 4k.
+
+
+--------------------------------------------------------------------------------
+5. URBAN FUTSAL PITCH (VIBRANT GREEN TURF + INDUSTRIAL BLACK + WOOD)
+--------------------------------------------------------------------------------
+
+Filename: courtconnect-futsal-pitch.png (Main Hero)
+Prompt:
+A premium indoor futsal pitch featuring a vibrant green synthetic turf field with clean white markings. Professional metal futsal goals with black netting on both ends. Modern black industrial building interior with vertical dark oak wood slat walls. High-end stadium lighting, empty spectator bench, completely vacant with no players. Luxury sports facility, wide-angle, photorealistic, 8k.
+
+Filename: futsal-angle-1.png (Goal POV)
+Prompt:
+A view from inside one of the futsal goals, looking out across the vibrant green turf pitch to the opposite end. Clear line markings, empty pitch, professional goal net details in the foreground. Modern dark industrial walls and wood paneling under warm LED lighting. Empty, 4k resolution.
+
+Filename: futsal-angle-2.png (Midfield Perspective)
+Prompt:
+A horizontal midfield perspective of a premium indoor futsal turf pitch. High-end synthetic grass, modern black interior walls with wood slat details, and warm glowing LED lighting. Completely vacant, clean athletic design, architectural visualization.
+
+
+--------------------------------------------------------------------------------
+6. CLUB ACCENTS & LOUNGES
+--------------------------------------------------------------------------------
+
+Filename: courtconnect-booking-lounge.png (Club Reception Lounge)
+Prompt:
+A luxury sports club reception lounge and lounge area. Modern minimalist furniture, dark slate flooring, dark wood wall paneling, and warm ambient light. Glass walls overlook the sports courts. A sleek reception counter and digital displays. Premium high-end athletic country club lounge. Photorealistic, interior design visualization, 8k.
+
+Filename: courtconnect-multisport-hero.png (Multisport Hall View)
+Prompt:
+A wide view of a spacious indoor multi-sport facility, showing a polished maple wood floor marked for multiple sports (basketball, volleyball, badminton). Premium modern dark interior with vertical wood wall panels, glowing LED lines, and high-end ceiling architecture. Empty, no people, clean and ready for play. Photorealistic render, 4k.
+
+Filename: courtconnect-club-courts.png (Glass-Walled Courts)
+Prompt:
+A series of glass-walled squash/tennis courts in a premium health club. Elegant dark gray accents, natural wood frames, polished floors, and sleek warm LED lights. Completely vacant. High-end architectural photography, 4k.

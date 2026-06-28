@@ -12,7 +12,7 @@ class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        return view('admin.users.index', [
+        return view('admin.users.admin-users', [
             'users' => User::query()
                 ->when($request->search, fn ($query, $search) => $query->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"))
                 ->latest()

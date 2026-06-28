@@ -30,7 +30,7 @@ class AvailabilityService
         return ! Reservation::query()
             ->where('court_id', $court->id)
             ->whereDate('reservation_date', $date)
-            ->whereIn('status', ['pending', 'approved'])
+            ->active()
             ->when($ignoreReservationId, fn ($query) => $query->whereKeyNot($ignoreReservationId))
             ->where('start_time', '<', $endTime)
             ->where('end_time', '>', $startTime)

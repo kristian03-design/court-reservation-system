@@ -16,13 +16,39 @@ class ReservationService
 
     public function create(User $user, Court $court, array $data): Reservation
     {
-        if (! $this->availabilityService->isSlotAvailable($court, $data['reservation_date'], $data['start_time'], $data['end_time'])) {
-            throw ValidationException::withMessages([
-                'start_time' => 'That court is no longer available for the selected time slot.',
-            ]);
-        }
-
         return DB::transaction(function () use ($user, $court, $data) {
+            // Apply lockForUpdate to prevent race conditions on availability
+            $exists = Reservation::query()
+                ->where('court_id', $court->id)
+                ->whereDate('reservation_date', $data['reservation_date'])
+                ->active()
+                ->where('start_time', '<', $data['end_time'])
+                ->where('end_time', '>', $data['start_time'])
+                ->lockForUpdate()
+                ->exists();
+
+            if ($exists) {
+                throw ValidationException::withMessages([
+                    'start_time' => 'That court is no longer available for the selected time slot.',
+                ]);
+            }
+
+            // Also check blocked schedules
+            $blockedSchedule = \App\Models\CourtSchedule::query()
+                ->where('court_id', $court->id)
+                ->whereDate('schedule_date', $data['reservation_date'])
+                ->whereIn('availability_status', ['reserved', 'maintenance', 'closed'])
+                ->where('start_time', '<', $data['end_time'])
+                ->where('end_time', '>', $data['start_time'])
+                ->lockForUpdate()
+                ->exists();
+
+            if ($blockedSchedule) {
+                throw ValidationException::withMessages([
+                    'start_time' => 'That court is no longer available for the selected time slot.',
+                ]);
+            }
+
             $reservation = Reservation::create([
                 'reservation_number' => 'CC-'.now()->format('Ymd').'-'.strtoupper(str()->random(6)),
                 'user_id' => $user->id,
@@ -32,7 +58,7 @@ class ReservationService
                 'end_time' => $data['end_time'],
                 'players' => $data['players'],
                 'total_amount' => $this->calculateTotal($court, $data['start_time'], $data['end_time']),
-                'status' => 'pending',
+                'status' => 'held',
                 'notes' => $data['notes'] ?? null,
             ]);
 
@@ -44,7 +70,13 @@ class ReservationService
 
             $user->systemNotifications()->create([
                 'title' => 'Reservation created',
-                'message' => "Reservation {$reservation->reservation_number} is pending approval.",
+                'message' => "Reservation {$reservation->reservation_number} is held for 10 minutes. Please complete payment.",
+            ]);
+
+            \App\Services\AuditLogService::log('reservation_created', $reservation, [
+                'reservation_number' => $reservation->reservation_number,
+                'court_name' => $court->court_name,
+                'amount' => $reservation->total_amount,
             ]);
 
             return $reservation->load(['court', 'payment']);

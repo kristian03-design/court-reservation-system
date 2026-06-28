@@ -14,8 +14,10 @@ class EmailVerificationController extends Controller
 {
     public function notice(): View|RedirectResponse
     {
+        $request = request();
+
         return request()->user()->hasVerifiedEmail()
-            ? redirect()->intended(route('dashboard'))
+            ? redirect()->intended(route($this->homeRoute($request)))
             : view('auth.verify-email');
     }
 
@@ -23,13 +25,14 @@ class EmailVerificationController extends Controller
     {
         $request->fulfill();
 
-        return redirect()->route('dashboard')->with('success', 'Email verified. Welcome to CourtConnect.');
+        return redirect()->intended(route($this->homeRoute($request)))
+            ->with('success', 'Email verified. Welcome to CourtConnect.');
     }
 
     public function send(Request $request): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->route('dashboard');
+            return redirect()->route($this->homeRoute($request));
         }
 
         try {
@@ -46,5 +49,10 @@ class EmailVerificationController extends Controller
         }
 
         return back()->with('success', 'Verification link sent.');
+    }
+
+    private function homeRoute(Request $request): string
+    {
+        return $request->user()->isAdmin() ? 'admin.dashboard' : 'dashboard';
     }
 }

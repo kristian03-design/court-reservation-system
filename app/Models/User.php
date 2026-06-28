@@ -48,11 +48,36 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return in_array($this->role, ['admin', 'super_admin'], true);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin';
+    }
+
+    public function isStaff(): bool
+    {
+        return $this->role === 'staff';
+    }
+
+    public function isCustomer(): bool
+    {
+        return in_array($this->role, ['customer', 'user'], true);
+    }
+
+    public function isAllowedAdminPanel(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin', 'staff'], true);
     }
 
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\CustomResetPassword($token));
     }
 }

@@ -15,6 +15,8 @@ class ReservationController extends Controller
     {
         $reservations = Reservation::with(['court', 'user', 'payment'])
             ->when($request->status, fn ($query, $status) => $query->where('status', $status))
+            ->when($request->court_id, fn ($query, $courtId) => $query->where('court_id', $courtId))
+            ->when($request->date, fn ($query, $date) => $query->whereDate('reservation_date', $date))
             ->when($request->search, function ($query, $search) {
                 $query->where('reservation_number', 'like', "%{$search}%")
                     ->orWhereHas('user', fn ($userQuery) => $userQuery->where('name', 'like', "%{$search}%"));
@@ -23,12 +25,17 @@ class ReservationController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.reservations.index', ['reservations' => $reservations]);
+        $courts = \App\Models\Court::orderBy('court_name')->get();
+
+        return view('admin.reservations.admin-reservations', [
+            'reservations' => $reservations,
+            'courts' => $courts,
+        ]);
     }
 
     public function show(Reservation $reservation): View
     {
-        return view('admin.reservations.show', [
+        return view('admin.reservations.admin-reservation-show', [
             'reservation' => $reservation->load(['court', 'user', 'payment']),
         ]);
     }
@@ -36,10 +43,16 @@ class ReservationController extends Controller
     public function update(Request $request, Reservation $reservation): RedirectResponse
     {
         $data = $request->validate([
-            'status' => ['required', 'in:pending,approved,rejected,cancelled,completed'],
+            'status' => ['required', 'in:held,pending_payment,confirmed,completed,cancelled,expired'],
         ]);
 
         $reservation->update($data);
+
+        \App\Services\AuditLogService::log('reservation_status_updated', $reservation, [
+            'reservation_number' => $reservation->reservation_number,
+            'status' => $data['status'],
+        ]);
+
         $reservation->user->systemNotifications()->create([
             'title' => 'Reservation '.$data['status'],
             'message' => "Reservation {$reservation->reservation_number} was marked {$data['status']}.",
@@ -57,8 +70,8 @@ class ReservationController extends Controller
                 'start' => $reservation->reservation_date->toDateString().'T'.$reservation->start_time,
                 'end' => $reservation->reservation_date->toDateString().'T'.$reservation->end_time,
                 'color' => match ($reservation->status) {
-                    'approved' => '#22C55E',
-                    'rejected', 'cancelled' => '#EF4444',
+                    'confirmed' => '#22C55E',
+                    'cancelled', 'expired' => '#EF4444',
                     'completed' => '#3B82F6',
                     default => '#F59E0B',
                 },
@@ -68,7 +81,12 @@ class ReservationController extends Controller
 
     public function destroy(Reservation $reservation): RedirectResponse
     {
+        $resNum = $reservation->reservation_number;
         $reservation->delete();
+
+        \App\Services\AuditLogService::log('reservation_deleted', null, [
+            'reservation_number' => $resNum,
+        ]);
 
         return back()->with('success', 'Reservation deleted.');
     }
