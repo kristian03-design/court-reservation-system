@@ -259,12 +259,21 @@
                                                 <button disabled class="btn btn-outline" style="width: 100%; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; opacity: 0.5;">Closed</button>
                                             @elseif($event->registered >= $event->max_slots)
                                                 @if($event->allow_waitlist)
-                                                    <a href="{{ route('events.show', $event->slug) }}" class="btn btn-outline" style="width: 100%; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; color: var(--lime); border-color: var(--lime); text-decoration: none; text-align: center; display: block; line-height: 38px; box-sizing: border-box;">Join Waitlist</a>
+                                                    <div style="display: flex; gap: 8px;">
+                                                        <a href="{{ route('events.show', $event->slug) }}" class="btn btn-outline" style="flex: 1; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; text-decoration: none; text-align: center; display: block; line-height: 38px; box-sizing: border-box; border-color: var(--border); color: var(--text);">Details</a>
+                                                        <a href="{{ route('events.show', $event->slug) }}" class="btn btn-outline" style="flex: 1; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; color: var(--lime); border-color: var(--lime); text-decoration: none; text-align: center; display: block; line-height: 38px; box-sizing: border-box;">Join Waitlist</a>
+                                                    </div>
                                                 @else
-                                                    <button disabled class="btn btn-outline" style="width: 100%; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; opacity: 0.5;">Sold Out</button>
+                                                    <div style="display: flex; gap: 8px;">
+                                                        <a href="{{ route('events.show', $event->slug) }}" class="btn btn-outline" style="flex: 1; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; text-decoration: none; text-align: center; display: block; line-height: 38px; box-sizing: border-box; border-color: var(--border); color: var(--text);">Details</a>
+                                                        <button disabled class="btn btn-outline" style="flex: 1; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; opacity: 0.5;">Sold Out</button>
+                                                    </div>
                                                 @endif
                                             @else
-                                                <a href="{{ route('events.show', $event->slug) }}" class="btn btn-primary" style="width: 100%; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; text-decoration: none; text-align: center; display: block; line-height: 40px; box-sizing: border-box;">{{ $btnText }}</a>
+                                                <div style="display: flex; gap: 8px;">
+                                                    <a href="{{ route('events.show', $event->slug) }}" class="btn btn-outline" style="flex: 1; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; text-decoration: none; text-align: center; display: block; line-height: 38px; box-sizing: border-box; border-color: var(--border); color: var(--text);">Details</a>
+                                                    <a href="{{ route('events.show', $event->slug) }}" class="btn btn-primary" style="flex: 1; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; text-decoration: none; text-align: center; display: block; line-height: 40px; box-sizing: border-box; background: var(--lime); color: #000; border: none; font-weight: 700;">{{ $btnText }}</a>
+                                                </div>
                                             @endif
                                         </div>
                                     </div>
