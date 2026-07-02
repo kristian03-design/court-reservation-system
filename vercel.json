@@ -8,6 +8,11 @@
     }
   },
   "env": {
+    "APP_ENV": "production",
+    "APP_DEBUG": "false",
+    "APP_URL": "https://courtconnectsystem.vercel.app",
+    "ASSET_URL": "https://courtconnectsystem.vercel.app",
+    "FORCE_HTTPS": "true",
     "LOG_CHANNEL": "stderr",
     "VIEW_COMPILED_PATH": "/tmp",
     "APP_CONFIG_CACHE": "/tmp/config.php",
