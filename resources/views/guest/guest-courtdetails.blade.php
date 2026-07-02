@@ -24,7 +24,7 @@
 
         {{-- ══════════════ HERO BANNER ══════════════ --}}
         <div class="cc-detail-banner">
-            <img src="{{ $court->image ?: asset('images/courtconnect-multisport-hero.png') }}"
+            <img src="{{ $court->image ? asset($court->image) : asset('images/courtconnect-multisport-hero.webp') }}"
                  alt="{{ $court->court_name }}">
             <div class="cc-detail-banner-copy site-container scroll-reveal reveal-fade-up">
                 <div class="cc-breadcrumb">
@@ -129,8 +129,8 @@
                         
                         // Fallback to type-specific JSON config, or general default
                         $galleryImages = $dbGallery ?: ($galleryConfig[$typeSlug] ?? [
-                            $court->image ?: 'images/courtconnect-multisport-hero.png',
-                            'images/courtconnect-club-courts.png'
+                            $court->image ?: 'images/courtconnect-multisport-hero.webp',
+                            'images/courtconnect-club-courts.webp'
                         ]);
                         
                         // Ensure all local paths point to existing files

@@ -163,7 +163,7 @@
                     @foreach ($courts->take(3) as $court)
                         <article class="cc-court-card scroll-reveal reveal-fade-up stagger-{{ $loop->iteration }}">
                             <a href="{{ route('courts.show', $court) }}" class="cc-court-image">
-                                <img src="{{ $court->image ?: asset('images/courtconnect-multisport-hero.webp') }}" alt="{{ $court->court_name }}">
+                                <img src="{{ $court->image ? asset($court->image) : asset('images/courtconnect-multisport-hero.webp') }}" alt="{{ $court->court_name }}">
                                 @if ($court->status === 'available')
                                     <span class="sport-badge">{{ $court->court_type }}</span>
                                 @else

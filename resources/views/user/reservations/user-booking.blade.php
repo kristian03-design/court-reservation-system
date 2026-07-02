@@ -10,7 +10,7 @@
         <!-- Left Side: Context / Preview -->
         <div class="booking-preview">
             <div class="booking-preview-bg">
-                <img id="court-preview-image" src="{{ $court ? ($court->image ?: asset('images/courtconnect-multisport-hero.png')) : asset('images/courtconnect-multisport-hero.png') }}" alt="Court Preview">
+                <img id="court-preview-image" src="{{ $court ? ($court->image ? asset($court->image) : asset('images/courtconnect-multisport-hero.webp')) : asset('images/courtconnect-multisport-hero.webp') }}" alt="Court Preview">
             </div>
 
             <div class="booking-preview-content">
@@ -26,7 +26,7 @@
                 <div class="court-preview-card" id="court-detail-card" style="display: {{ $court ? 'block' : 'none' }}">
                     <div class="court-preview-top">
                         <div class="court-preview-thumb">
-                            <img id="court-card-image" src="{{ $court ? ($court->image ?: asset('images/courtconnect-multisport-hero.png')) : asset('images/courtconnect-multisport-hero.png') }}" alt="Court Thumbnail">
+                            <img id="court-card-image" src="{{ $court ? ($court->image ? asset($court->image) : asset('images/courtconnect-multisport-hero.webp')) : asset('images/courtconnect-multisport-hero.webp') }}" alt="Court Thumbnail">
                         </div>
                         <div>
                             <p id="court-card-type">{{ $court?->court_type }}</p>

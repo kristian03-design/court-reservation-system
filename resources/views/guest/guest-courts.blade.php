@@ -102,7 +102,7 @@
                             @php $isUnavailable = $court->status !== 'available'; @endphp
                             <article class="cc-court-card scroll-reveal reveal-fade-up stagger-{{ $loop->iteration }} {{ $isUnavailable ? 'is-unavailable' : '' }}">
                                 <a href="{{ route('courts.show', $court) }}" class="cc-court-image">
-                                    <img src="{{ $court->image ?: asset('images/courtconnect-multisport-hero.png') }}"
+                                    <img src="{{ $court->image ? asset($court->image) : asset('images/courtconnect-multisport-hero.webp') }}"
                                          alt="{{ $court->court_name }}">
                                     @if ($isUnavailable)
                                         <span class="badge-fully-booked">Fully Booked</span>
