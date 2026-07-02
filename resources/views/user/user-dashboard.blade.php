@@ -110,52 +110,6 @@
                 @endif
             </section>
 
-            {{-- Joined Tournaments Panel --}}
-            <section class="dashboard-panel scroll-reveal reveal-fade-up stagger-2">
-                <div class="section-title-row">
-                    <div>
-                        <p class="dash-kicker">My Competitions</p>
-                        <h2>Registered Tournaments</h2>
-                    </div>
-                    <a href="{{ route('tournaments.index') }}">Browse all →</a>
-                </div>
-
-                @if ($joinedTournaments->isEmpty())
-                    <div class="empty-state">
-                        <div class="empty-state-icon">
-                            <i data-lucide="trophy"></i>
-                        </div>
-                        <h3>No Tournaments Joined</h3>
-                        <p>Register for any public tournament or league to view your matchups and live brackets.</p>
-                        <a href="{{ route('tournaments.index') }}" class="btn btn-outline">Explore Tournaments</a>
-                    </div>
-                @else
-                    <div class="reservation-card-list">
-                        @foreach ($joinedTournaments as $tournament)
-                            <article class="reservation-card">
-                                <div class="reservation-date-tile" style="background: var(--lime-dim); border: 1px solid var(--lime);">
-                                    <span style="color: var(--lime);">TMT</span>
-                                    <strong style="color: var(--lime); font-size: 14px;">{{ strtoupper(substr($tournament->type, 0, 3)) }}</strong>
-                                </div>
-                                <div class="reservation-main">
-                                    <div class="reservation-topline">
-                                        <span>Status</span>
-                                        <span class="status status-{{ $tournament->status }}">{{ str_replace('_', ' ', $tournament->status) }}</span>
-                                    </div>
-                                    <h3>{{ $tournament->name }}</h3>
-                                    <p>Starts: {{ $tournament->start_date->format('M d, Y') }} &middot; Max players: {{ $tournament->max_participants }}</p>
-                                </div>
-                                <div class="reservation-side">
-                                    <span class="status" style="background: rgba(255,255,255,0.05); color: var(--text);">
-                                        {{ $tournament->type === 'single' ? 'Single Elim' : ($tournament->type === 'double' ? 'Double Elim' : 'Round Robin') }}
-                                    </span>
-                                    <a href="{{ route('dashboard.tournaments.show', $tournament) }}" class="btn btn-outline btn-sm">Live Bracket</a>
-                                </div>
-                            </article>
-                        @endforeach
-                    </div>
-                @endif
-            </section>
         </div>
 
         {{-- Side console --}}
@@ -210,6 +164,30 @@
                     </a>
                 </div>
             </section>
+
+            {{-- Upcoming Events Card --}}
+            @if($upcomingEvents->isNotEmpty())
+                <section class="card scroll-reveal reveal-fade-left stagger-3" style="background: linear-gradient(135deg, rgba(191,255,0,0.04) 0%, rgba(0,0,0,0) 100%);">
+                    <p class="dash-kicker" style="color: var(--lime);">Recommended For You</p>
+                    <h2>Upcoming Events</h2>
+                    <p style="font-size:12px; color:var(--muted); margin:0 0 16px;">New sessions you might be interested to join:</p>
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        @foreach($upcomingEvents as $evt)
+                            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; gap:12px; align-items:center; justify-content:space-between;">
+                                <div style="display:flex; gap:12px; align-items:center; min-width:0; flex:1;">
+                                    <img src="{{ $evt->image ? asset($evt->image) : asset('images/courtconnect-multisport-hero.png') }}" style="width:40px; height:40px; object-fit:cover; border-radius:6px; flex-shrink:0;" alt="event image">
+                                    <div style="min-width:0; flex:1;">
+                                        <span style="font-size:8px; font-weight:700; color:var(--lime); text-transform:uppercase; display:block;">{{ $evt->sport }}</span>
+                                        <strong style="color:#fff; font-size:12px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $evt->title }}</strong>
+                                        <span style="font-size:10px; color:var(--muted);">{{ $evt->start_date->format('M d') }} · {{ $evt->price > 0 ? '₱' . number_format($evt->price) : 'Free' }}</span>
+                                    </div>
+                                </div>
+                                <a href="{{ route('events.show', $evt->slug) }}" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px; flex-shrink:0; text-decoration:none; height:auto; line-height:1.2;">Join</a>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
 
             {{-- Activity timeline --}}
             <section class="card scroll-reveal reveal-fade-left stagger-3">

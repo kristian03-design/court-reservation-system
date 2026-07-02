@@ -41,7 +41,7 @@ class TournamentGeneratorService
     /**
      * Generate Single Elimination Bracket.
      */
-    protected function generateSingleElimination(Tournament $tournament, $participants): void
+    protected function generateSingleElimination(Tournament $tournament, \Illuminate\Database\Eloquent\Collection $participants): void
     {
         $count = $participants->count();
         // Find next power of 2
@@ -77,7 +77,7 @@ class TournamentGeneratorService
         for ($round = 1; $round < $totalRounds; $round++) {
             $matchesInRound = count($matchesByRound[$round]);
             for ($m = 1; $m <= $matchesInRound; $m++) {
-                $nextMatchNum = ceil($m / 2);
+                $nextMatchNum = (int) ceil($m / 2);
                 $matchesByRound[$round][$m]->update([
                     'next_match_id' => $matchesByRound[$round + 1][$nextMatchNum]->id,
                 ]);
@@ -130,7 +130,7 @@ class TournamentGeneratorService
     /**
      * Generate Double Elimination Bracket.
      */
-    protected function generateDoubleElimination(Tournament $tournament, $participants): void
+    protected function generateDoubleElimination(Tournament $tournament, \Illuminate\Database\Eloquent\Collection $participants): void
     {
         // For double elimination, we will construct a winner bracket of size P and a loser bracket.
         // For simplicity in a custom PHP script, we generate the Winner Bracket (Single Elimination)
@@ -155,7 +155,7 @@ class TournamentGeneratorService
     /**
      * Generate Round Robin Schedule.
      */
-    protected function generateRoundRobin(Tournament $tournament, $participants): void
+    protected function generateRoundRobin(Tournament $tournament, \Illuminate\Database\Eloquent\Collection $participants): void
     {
         $list = $participants->toArray();
         $count = count($list);

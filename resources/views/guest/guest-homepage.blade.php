@@ -25,7 +25,7 @@
             </div>
             <div class="site-container cc-hero-grid">
                 <div class="scroll-reveal reveal-fade-up">
-                    <p class="cc-kicker">Badminton · Tennis · Basketball · Futsal</p>
+                    <p class="cc-kicker">Badminton · Tennis · Basketball · Futsal · Volleyball</p>
                     <h1>
                         Book your court.<br>
                         <span class="accent">Own your game.</span>
@@ -89,7 +89,7 @@
                             <span style="color: var(--lime);">{{ $occupancyRate }}% ({{ $occupiedCount }}/{{ $totalCount }} courts)</span>
                         </div>
                         <div style="width: 100%; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden;">
-                            <div style="width: {{ $occupancyRate }}%; height: 100%; background: var(--lime); border-radius: 99px;"></div>
+                            <div style="width: <?php echo $occupancyRate; ?>%; height: 100%; background: var(--lime); border-radius: 99px;"></div>
                         </div>
                     </div>
 
@@ -258,9 +258,21 @@
                     <div style="position: relative; overflow: hidden; width: 100%;">
                         <div id="testimonial-track" style="display: flex; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); gap: 20px;">
                             @foreach ($testimonials as $testimonial)
-                                <figure class="review-card" style="flex: 0 0 100%; max-width: 100%; margin: 0; box-sizing: border-box;">
-                                    <p>{{ $testimonial->comment }}</p>
-                                    <figcaption>{{ $testimonial->name }}</figcaption>
+                                <figure class="review-card" style="flex: 0 0 100%; max-width: 100%; margin: 0; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
+                                    {{-- Star rating --}}
+                                    <div style="display: flex; gap: 4px; margin-bottom: 4px;">
+                                        @for ($s = 1; $s <= 5; $s++)
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="{{ $s <= ($testimonial->rating ?? 5) ? 'var(--lime)' : 'none' }}" stroke="{{ $s <= ($testimonial->rating ?? 5) ? 'var(--lime)' : 'var(--border)' }}" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        @endfor
+                                    </div>
+                                    <p style="flex: 1; margin: 0; font-size: 14px; line-height: 1.7; color: var(--text);">&ldquo;{{ $testimonial->comment }}&rdquo;</p>
+                                    {{-- Author row --}}
+                                    <div style="display: flex; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid var(--border);">
+                                        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--lime-dim); border: 1px solid var(--lime); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                            <span style="font-family: var(--display-font); font-size: 16px; color: var(--lime); line-height: 1;">{{ strtoupper(substr($testimonial->name, 0, 1)) }}</span>
+                                        </div>
+                                        <figcaption style="font-size: 13px; font-weight: 700; color: var(--text); font-family: var(--ui-font); margin: 0;">{{ $testimonial->name }}</figcaption>
+                                    </div>
                                 </figure>
                             @endforeach
                         </div>
@@ -284,12 +296,34 @@
                 if (!track || slides.length === 0) return;
 
                 var currentIndex = 0;
+                var slideWidth = 0;
+
+                function renderDots(maxIndex) {
+                    if (!dotsContainer) return;
+                    if (maxIndex === 0) {
+                        dotsContainer.style.display = 'none';
+                        return;
+                    }
+                    dotsContainer.style.display = 'flex';
+                    var html = '';
+                    for (var i = 0; i <= maxIndex; i++) {
+                        var active = i === currentIndex;
+                        var bg = active ? 'var(--lime)' : 'var(--border)';
+                        var transform = active ? 'scale(1.2)' : 'none';
+                        html += '<button type="button" class="testimonial-dot" data-index="' + i + '" style="width: 8px; height: 8px; border-radius: 50%; border: none; background: ' + bg + '; cursor: pointer; padding: 0; transition: background var(--transition), transform var(--transition); transform: ' + transform + ';" aria-label="Go to testimonial slide ' + (i + 1) + '"></button>';
+                    }
+                    dotsContainer.innerHTML = html;
+                }
 
                 function updateSlide(index) {
+                    var showCount = window.innerWidth >= 1024 ? 3 : (window.innerWidth >= 768 ? 2 : 1);
+                    var maxIndex = Math.max(0, slides.length - showCount);
+                    if (index > maxIndex) index = maxIndex;
+                    if (index < 0) index = 0;
+
                     currentIndex = index;
                     
                     var gap = 20;
-                    var slideWidth = slides[0].getBoundingClientRect().width;
                     var offset = index * (slideWidth + gap);
                     track.style.transform = 'translateX(-' + offset + 'px)';
 
@@ -310,7 +344,7 @@
                     var gap = 20;
                     var showCount = window.innerWidth >= 1024 ? 3 : (window.innerWidth >= 768 ? 2 : 1);
                     
-                    var slideWidth = (containerWidth - (gap * (showCount - 1))) / showCount;
+                    slideWidth = (containerWidth - (gap * (showCount - 1))) / showCount;
                     
                     for (var i = 0; i < slides.length; i++) {
                         slides[i].style.flex = '0 0 ' + slideWidth + 'px';
@@ -321,7 +355,16 @@
                     if (currentIndex > maxIndex) {
                         currentIndex = maxIndex;
                     }
+
+                    if (maxIndex === 0) {
+                        if (prevBtn) prevBtn.style.display = 'none';
+                        if (nextBtn) nextBtn.style.display = 'none';
+                    } else {
+                        if (prevBtn) prevBtn.style.display = 'grid';
+                        if (nextBtn) nextBtn.style.display = 'grid';
+                    }
                     
+                    renderDots(maxIndex);
                     updateSlide(currentIndex);
                 }
 

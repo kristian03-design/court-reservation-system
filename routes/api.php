@@ -14,3 +14,6 @@ Route::prefix('v1')->middleware('signature')->group(function () {
         Route::get('/reservations/{reservation}', [ApiBookingController::class, 'show']);
     });
 });
+
+Route::get('/tournaments/{id}/participants', [App\Http\Controllers\Api\TournamentApiController::class, 'participants']);
+Route::get('/tournaments/{id}/matches-data', [App\Http\Controllers\Api\TournamentApiController::class, 'matchesData']);

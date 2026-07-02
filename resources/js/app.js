@@ -28,6 +28,7 @@ import {
     LogOut,
     Mail,
     Menu,
+    MessageCircle,
     PanelLeftClose,
     PanelLeftOpen,
     Phone,
@@ -81,6 +82,7 @@ const renderLucideIcons = () => createIcons({
         LogOut,
         Mail,
         Menu,
+        MessageCircle,
         PanelLeftClose,
         PanelLeftOpen,
         Phone,
@@ -202,4 +204,50 @@ window.addEventListener('load', () => {
 });
 // Fallback timeout to guarantee page interaction after 2.5 seconds
 setTimeout(dismissLoader, 2500);
+
+// Global Form Double Submit Prevention & Loading Indicator
+document.addEventListener('DOMContentLoaded', () => {
+    // Inject spin keyframe if not present
+    if (!document.getElementById('cc-spin-style')) {
+        const style = document.createElement('style');
+        style.id = 'cc-spin-style';
+        style.innerHTML = `
+            @keyframes cc-spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            .cc-spinner {
+                animation: cc-spin 1s linear infinite !important;
+                display: inline-block !important;
+                margin-right: 8px !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (form.tagName === 'FORM') {
+            // Check if form is already submitting to prevent double submit
+            if (form.dataset.submitting) {
+                e.preventDefault();
+                return;
+            }
+            
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                form.dataset.submitting = 'true';
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.7';
+                submitBtn.style.cursor = 'not-allowed';
+                
+                // Prepend spinner
+                const spinner = document.createElement('i');
+                spinner.className = 'ti ti-loader-2 cc-spinner';
+                submitBtn.prepend(spinner);
+            }
+        }
+    });
+});
+
 

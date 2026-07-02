@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReservationRequest;
-use App\Models\AdminNotification;
 use App\Models\Court;
 use App\Models\Reservation;
 use App\Services\AvailabilityService;
@@ -48,13 +47,6 @@ class BookingController extends Controller
         $court = Court::findOrFail($request->validated('court_id'));
         $reservation = $reservationService->create($request->user(), $court, $request->validated());
 
-        AdminNotification::create([
-            'type'       => 'reservation',
-            'title'      => 'New Reservation',
-            'message'    => "{$request->user()->name} booked {$court->court_name} on {$reservation->reservation_date->format('M d, Y')} ({$reservation->start_time} – {$reservation->end_time}).",
-            'action_url' => route('admin.reservations.show', $reservation),
-        ]);
-
         return redirect()
             ->route('reservations.show', $reservation)
             ->with('success', 'Reservation created and awaiting approval.');
@@ -69,22 +61,11 @@ class BookingController extends Controller
         ]);
     }
 
-    public function cancel(Reservation $reservation): RedirectResponse
+    public function cancel(Reservation $reservation, ReservationService $reservationService): RedirectResponse
     {
         $this->authorize('update', $reservation);
 
-        $reservation->update(['status' => 'cancelled']);
-
-        \App\Services\AuditLogService::log('reservation_cancelled', $reservation, [
-            'reservation_number' => $reservation->reservation_number,
-        ]);
-
-        AdminNotification::create([
-            'type'       => 'reservation',
-            'title'      => 'Reservation Cancelled',
-            'message'    => "{$reservation->user->name} cancelled reservation {$reservation->reservation_number}.",
-            'action_url' => route('admin.reservations.show', $reservation),
-        ]);
+        $reservationService->cancel($reservation);
 
         return back()->with('success', 'Reservation cancelled.');
     }

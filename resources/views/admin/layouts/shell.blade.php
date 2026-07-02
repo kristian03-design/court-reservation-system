@@ -13,6 +13,7 @@
         'reservations' => ['label' => 'Reservations', 'url' => route('admin.reservations.index'), 'icon' => 'ti-calendar-event',   'section' => 'Management'],
         'courts'       => ['label' => 'Courts',       'url' => route('admin.courts.index'),       'icon' => 'ti-layout-grid',      'section' => 'Management'],
         'tournaments'  => ['label' => 'Tournaments',  'url' => route('admin.tournaments.index'),  'icon' => 'ti-trophy',           'section' => 'Management'],
+        'events'       => ['label' => 'Events',       'url' => route('admin.events.index'),       'icon' => 'ti-calendar',         'section' => 'Management'],
         'payments'     => ['label' => 'Payments',     'url' => route('admin.payments.index'),     'icon' => 'ti-credit-card',      'section' => 'Management'],
         'reports'      => ['label' => 'Reports',      'url' => route('admin.reports.index'),      'icon' => 'ti-chart-bar',        'section' => 'Analytics'],
         'users'        => ['label' => 'Users',        'url' => route('admin.users.index'),        'icon' => 'ti-users',            'section' => 'System'],

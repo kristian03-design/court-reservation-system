@@ -20,11 +20,17 @@ class TournamentParticipant extends Model
         'checked_in',
         'checked_in_at',
         'status',
+        'avatar',
+        'wins',
+        'losses',
+        'matches_played',
+        'is_eliminated',
     ];
 
     protected $casts = [
         'checked_in' => 'boolean',
         'checked_in_at' => 'datetime',
+        'is_eliminated' => 'boolean',
     ];
 
     public function tournament(): BelongsTo

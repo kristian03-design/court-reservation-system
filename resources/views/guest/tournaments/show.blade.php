@@ -11,6 +11,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/css/views/guest.css', 'resources/css/views/user.css', 'resources/js/app.js'])
+    <style>
+        .rr-match-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #fff;
+            font-weight: 400;
+        }
+        .rr-match-row.is-winner {
+            color: var(--lime);
+            font-weight: 700;
+        }
+    </style>
 </head>
 <body class="public-page padele-home padele-inner">
     @include('partials.public-header')
@@ -49,18 +62,30 @@
 
             {{-- Tabs --}}
             <div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:28px;gap:0;overflow-x:auto;">
+                <button type="button" class="tab-btn" onclick="switchTab('overview')" id="tab-btn-overview"
+                        style="background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:10px 20px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;transition:color 0.15s,border-color 0.15s;">
+                    Overview
+                </button>
+                <a href="{{ route('tournaments.participants', $tournament) }}" class="tab-btn"
+                   style="text-decoration:none;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:10px 20px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;transition:color 0.15s,border-color 0.15s;">
+                    Participants ({{ $tournament->participants->count() }})
+                </a>
                 <button type="button" class="tab-btn active" onclick="switchTab('bracket')" id="tab-btn-bracket"
                         style="background:none;border:none;border-bottom:2px solid var(--lime);color:#fff;padding:10px 20px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;transition:color 0.15s,border-color 0.15s;">
                     Live Bracket
                 </button>
-                <button type="button" class="tab-btn" onclick="switchTab('info')" id="tab-btn-info"
+                <button type="button" class="tab-btn" onclick="switchTab('schedule')" id="tab-btn-schedule"
                         style="background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:10px 20px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;transition:color 0.15s,border-color 0.15s;">
-                    Info &amp; Rules
+                    Schedule
                 </button>
-                <button type="button" class="tab-btn" onclick="switchTab('entrants')" id="tab-btn-entrants"
+                <button type="button" class="tab-btn" onclick="switchTab('rules')" id="tab-btn-rules"
                         style="background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:10px 20px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;transition:color 0.15s,border-color 0.15s;">
-                    Participants ({{ $tournament->participants->count() }})
+                    Rules
                 </button>
+                <a href="{{ route('tournaments.participants', $tournament) }}?tab=leaderboard" class="tab-btn"
+                   style="text-decoration:none;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:10px 20px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;transition:color 0.15s,border-color 0.15s;">
+                    Leaderboard
+                </a>
             </div>
 
             {{-- ═══════════════ BRACKET TAB ═══════════════ --}}
@@ -80,11 +105,11 @@
                                     <span class="bracket-card-status s-{{ $match->status }}">{{ strtoupper($match->status) }}</span>
                                 </div>
                                 <div class="rr-match-card-body">
-                                    <div style="display:flex;justify-content:space-between;color:{{ $match->winner_id === $match->participant1_id && $match->winner_id ? 'var(--lime)' : '#fff' }};font-size:13px;font-weight:{{ $match->winner_id === $match->participant1_id && $match->winner_id ? '700' : '400' }};">
+                                    <div class="rr-match-row {{ $match->winner_id === $match->participant1_id && $match->winner_id ? 'is-winner' : '' }}">
                                         <span>{{ $match->participant1?->display_name ?? 'TBD' }}</span>
                                         <strong>{{ $match->sets->sum('participant1_score') }}</strong>
                                     </div>
-                                    <div style="display:flex;justify-content:space-between;color:{{ $match->winner_id === $match->participant2_id && $match->winner_id ? 'var(--lime)' : '#fff' }};font-size:13px;font-weight:{{ $match->winner_id === $match->participant2_id && $match->winner_id ? '700' : '400' }};">
+                                    <div class="rr-match-row {{ $match->winner_id === $match->participant2_id && $match->winner_id ? 'is-winner' : '' }}">
                                         <span>{{ $match->participant2?->display_name ?? 'TBD' }}</span>
                                         <strong>{{ $match->sets->sum('participant2_score') }}</strong>
                                     </div>
@@ -221,15 +246,15 @@
                 @endif
             </div>
 
-            {{-- ═══════════════ INFO TAB ═══════════════ --}}
-            <div class="tab-pane" id="tab-pane-info" style="display:none;">
+            {{-- ═══════════════ OVERVIEW TAB ═══════════════ --}}
+            <div class="tab-pane" id="tab-pane-overview" style="display:none;">
                 <div style="display:flex;flex-wrap:wrap;gap:24px;">
                     <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;flex:1;min-width:280px;">
                         <h3 style="margin:0 0 14px;font-family:var(--display-font);font-size:28px;color:#fff;letter-spacing:1px;">
-                            Description &amp; Rules
+                            Overview
                         </h3>
                         <p style="margin:0;color:var(--muted-mid);line-height:1.7;font-size:13px;white-space:pre-line;">
-                            {{ $tournament->description ?: 'No description provided for this tournament.' }}
+                            {{ $tournament->description ?: 'No overview provided for this tournament.' }}
                         </p>
                     </div>
 
@@ -261,33 +286,56 @@
                 </div>
             </div>
 
-            {{-- ═══════════════ PARTICIPANTS TAB ═══════════════ --}}
-            <div class="tab-pane" id="tab-pane-entrants" style="display:none;">
-                <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-                    @if ($tournament->participants->isEmpty())
-                        <div style="padding:40px;text-align:center;color:var(--muted);">
-                            No entrants registered yet.
-                        </div>
-                    @else
-                        <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                            <thead>
-                                <tr style="border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">
-                                    <th style="padding:10px 20px;text-align:left;">Name</th>
-                                    <th style="padding:10px 16px;text-align:center;">Seed</th>
-                                    <th style="padding:10px 16px;text-align:left;">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($tournament->participants as $p)
-                                    <tr style="border-bottom:1px solid var(--border);">
-                                        <td style="padding:14px 20px;font-weight:600;color:#fff;">{{ $p->display_name }}</td>
-                                        <td style="padding:14px 16px;text-align:center;">#{{ $p->seed }}</td>
-                                        <td style="padding:14px 16px;text-transform:capitalize;color:var(--muted-mid);">{{ $p->status }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @endif
+            {{-- ═══════════════ SCHEDULE TAB ═══════════════ --}}
+            <div class="tab-pane" id="tab-pane-schedule" style="display:none;">
+                <h3 style="font-family: var(--display-font); font-size: 28px; text-transform: uppercase; color: #fff; margin-bottom: 20px;">Match Schedule</h3>
+                @if ($tournament->matches->isEmpty())
+                    <div style="text-align:center;padding:40px;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--muted);">
+                        No matches scheduled yet.
+                    </div>
+                @else
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:20px;">
+                        @foreach ($tournament->matches as $match)
+                            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:12px;">
+                                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase;color:var(--muted);font-weight:700;">
+                                    <span>Round {{ $match->round_number }} · Match {{ $match->match_number }}</span>
+                                    <span class="status status-{{ $match->status }}" style="font-size:9px;padding:2px 6px;">{{ $match->status }}</span>
+                                </div>
+                                <div style="display:flex;flex-direction:column;gap:8px;padding-block:4px;">
+                                    <div style="display:flex;justify-content:space-between;font-weight:600;color:{{ $match->winner_id === $match->participant1_id && $match->winner_id ? 'var(--lime)' : '#fff' }};">
+                                        <span>{{ $match->participant1?->display_name ?? 'TBD' }}</span>
+                                        <span>{{ $match->sets->isNotEmpty() ? $match->sets->sum('participant1_score') : '-' }}</span>
+                                    </div>
+                                    <div style="display:flex;justify-content:space-between;font-weight:600;color:{{ $match->winner_id === $match->participant2_id && $match->winner_id ? 'var(--lime)' : '#fff' }};">
+                                        <span>{{ $match->participant2?->display_name ?? 'TBD' }}</span>
+                                        <span>{{ $match->sets->isNotEmpty() ? $match->sets->sum('participant2_score') : '-' }}</span>
+                                    </div>
+                                </div>
+                                @if($match->schedule)
+                                    <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:12px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted-mid);">
+                                        <span><i data-lucide="clock" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> {{ $match->schedule->start_time->format('M d, h:i A') }}</span>
+                                        <span><i data-lucide="map-pin" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> {{ $match->schedule->court->court_name }}</span>
+                                    </div>
+                                @else
+                                    <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:12px;font-size:11px;color:var(--muted);font-style:italic;">
+                                        Schedule pending.
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            {{-- ═══════════════ RULES TAB ═══════════════ --}}
+            <div class="tab-pane" id="tab-pane-rules" style="display:none;">
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;">
+                    <h3 style="margin:0 0 14px;font-family:var(--display-font);font-size:28px;color:#fff;letter-spacing:1px;">
+                        Rules &amp; Regulations
+                    </h3>
+                    <p style="margin:0;color:var(--muted-mid);line-height:1.7;font-size:13px;white-space:pre-line;">
+                        {{ $tournament->description ?: 'No rules specified for this tournament.' }}
+                    </p>
                 </div>
             </div>
         </section>
@@ -420,13 +468,92 @@
     function switchTab(tab) {
         document.querySelectorAll('.tab-btn').forEach(btn => {
             const a = btn.id === 'tab-btn-' + tab;
-            btn.style.borderBottomColor = a ? 'var(--lime)' : 'transparent';
-            btn.style.color = a ? '#fff' : 'var(--muted)';
+            if (btn.tagName === 'BUTTON') {
+                btn.style.borderBottomColor = a ? 'var(--lime)' : 'transparent';
+                btn.style.color = a ? '#fff' : 'var(--muted)';
+            }
         });
         document.querySelectorAll('.tab-pane').forEach(p => {
             p.style.display = p.id === 'tab-pane-' + tab ? 'block' : 'none';
         });
-        if (tab === 'bracket') setTimeout(function() { layoutBracket(); drawConnectors(); }, 40);
+        if (tab === 'bracket') {
+            setTimeout(function() { layoutBracket(); drawConnectors(); }, 40);
+        }
+    }
+
+    function highlightParticipantInBracket() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const highlightName = urlParams.get('highlight');
+        if (!highlightName) return;
+
+        // Switch to bracket tab
+        switchTab('bracket');
+
+        setTimeout(() => {
+            const rows = Array.from(document.querySelectorAll('.bracket-participant-row'));
+            let foundElement = null;
+
+            for (const row of rows) {
+                const nameSpan = row.querySelector('span:not(.bracket-seed-badge)');
+                if (nameSpan && nameSpan.textContent.trim().toLowerCase() === highlightName.trim().toLowerCase()) {
+                    foundElement = row;
+                    break;
+                }
+            }
+
+            if (!foundElement) {
+                const champCard = document.getElementById('match-champion');
+                if (champCard) {
+                    const champNameDiv = champCard.querySelector('.bracket-match-body div');
+                    if (champNameDiv && champNameDiv.textContent.trim().toLowerCase() === highlightName.trim().toLowerCase()) {
+                        foundElement = champCard;
+                    }
+                }
+            }
+
+            if (foundElement) {
+                // Style highlighting
+                foundElement.style.transition = 'all 0.5s ease';
+                foundElement.style.outline = '3px solid var(--lime)';
+                foundElement.style.outlineOffset = '2px';
+                foundElement.style.borderRadius = '4px';
+                foundElement.style.backgroundColor = 'var(--lime-dim)';
+                foundElement.classList.add('highlight-pulse');
+
+                if (!document.getElementById('highlight-keyframes')) {
+                    const style = document.createElement('style');
+                    style.id = 'highlight-keyframes';
+                    style.innerHTML = `
+                        @keyframes bracketHighlightPulse {
+                            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(191, 255, 0, 0.7); }
+                            70% { transform: scale(1.04); box-shadow: 0 0 0 8px rgba(191, 255, 0, 0); }
+                            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(191, 255, 0, 0); }
+                        }
+                        .highlight-pulse {
+                            animation: bracketHighlightPulse 2s infinite ease-in-out;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+
+                // Autoscroll to centered node in scroll area
+                const scrollArea = document.getElementById('bracketScrollArea');
+                if (scrollArea) {
+                    const rect = foundElement.getBoundingClientRect();
+                    const canvas = document.getElementById('bracketCanvas');
+                    const canvasRect = canvas.getBoundingClientRect();
+
+                    const elemTop = rect.top - canvasRect.top;
+                    const elemLeft = rect.left - canvasRect.left;
+
+                    scrollArea.scrollTo({
+                        top: elemTop - scrollArea.clientHeight / 2 + rect.height / 2,
+                        left: elemLeft - scrollArea.clientWidth / 2 + rect.width / 2,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }, 150);
     }
 
     function bracketZoom(delta) {
@@ -445,8 +572,17 @@
         setTimeout(drawConnectors, 60);
     }
 
-    // Auto-run on page load (bracket is the default tab here)
-    window.addEventListener('load', function() { setTimeout(function() { layoutBracket(); drawConnectors(); }, 80); });
+    // Auto-run on page load
+    window.addEventListener('load', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab') || 'bracket';
+        switchTab(tab);
+        setTimeout(function() { 
+            layoutBracket(); 
+            drawConnectors(); 
+            highlightParticipantInBracket();
+        }, 100);
+    });
     window.addEventListener('resize', drawConnectors);
 
     // Drag to scroll

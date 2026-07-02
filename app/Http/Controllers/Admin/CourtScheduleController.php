@@ -76,7 +76,7 @@ class CourtScheduleController extends Controller
         if (class_exists(AuditLogService::class)) {
             AuditLogService::log('schedule_deleted', $court, [
                 'court_name' => $court->court_name,
-                'date' => $schedule->schedule_date->toDateString(),
+                'date' => \Carbon\Carbon::parse($schedule->schedule_date)->toDateString(),
                 'time' => "{$schedule->start_time} - {$schedule->end_time}",
             ]);
         }

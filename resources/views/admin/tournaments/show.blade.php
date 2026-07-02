@@ -1,6 +1,43 @@
 @extends('admin.layouts.shell', ['pageTitle' => $tournament->name, 'active' => 'tournaments'])
 
 @section('content')
+    <style>
+        .tab-btn {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--muted);
+            padding: 10px 18px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .tab-btn.active {
+            border-bottom-color: var(--lime) !important;
+            color: #fff !important;
+        }
+        .rr-match-row {
+            color: #fff;
+        }
+        .rr-match-row.is-winner {
+            color: var(--lime);
+        }
+        .match-cell {
+            color: #fff;
+            font-weight: 400;
+        }
+        .match-cell.is-winner {
+            color: var(--lime);
+            font-weight: 700;
+        }
+        select option {
+            color: #111;
+            background: #fff;
+        }
+    </style>
+
     {{-- Page header --}}
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
         <div>
@@ -78,10 +115,7 @@
         @foreach ($tabs as $key => $label)
             <button type="button" class="tab-btn {{ $key === 'overview' ? 'active' : '' }}"
                     onclick="switchTab('{{ $key }}')"
-                    id="tab-btn-{{ $key }}"
-                    style="background:none;border:none;border-bottom:2px solid {{ $key === 'overview' ? 'var(--lime)' : 'transparent' }};
-                           color:{{ $key === 'overview' ? '#fff' : 'var(--muted)' }};
-                           padding:10px 18px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;transition:color 0.15s,border-color 0.15s;">
+                    id="tab-btn-{{ $key }}">
                 {{ $label }}
             </button>
         @endforeach
@@ -154,17 +188,21 @@
             <div class="rr-grid">
                 @foreach ($tournament->matches as $match)
                     <div class="rr-match-card"
-                         onclick="openScoreModal({{ $match->id }}, '{{ addslashes($match->participant1?->display_name ?? 'TBD') }}', '{{ addslashes($match->participant2?->display_name ?? 'TBD') }}', {{ json_encode($match->sets) }})">
+                         data-match-id="{{ $match->id }}"
+                         data-p1="{{ $match->participant1?->display_name ?? 'TBD' }}"
+                         data-p2="{{ $match->participant2?->display_name ?? 'TBD' }}"
+                         data-sets="{{ json_encode($match->sets) }}"
+                         onclick="openScoreModalFromElement(this)">
                         <div class="rr-match-card-header">
                             <span>Round {{ $match->round_number }} · Match {{ $match->match_number }}</span>
                             <span class="bracket-card-status s-{{ $match->status }}">{{ strtoupper($match->status) }}</span>
                         </div>
                         <div class="rr-match-card-body">
-                            <div style="display:flex;justify-content:space-between;color:{{ $match->winner_id === $match->participant1_id && $match->winner_id ? 'var(--lime)' : '#fff' }};font-size:13px;">
+                            <div class="rr-match-row {{ $match->winner_id === $match->participant1_id && $match->winner_id ? 'is-winner' : '' }}" style="display:flex;justify-content:space-between;font-size:13px;">
                                 <span>{{ $match->participant1?->display_name ?? 'TBD' }}</span>
                                 <strong>{{ $match->sets->sum('participant1_score') }}</strong>
                             </div>
-                            <div style="display:flex;justify-content:space-between;color:{{ $match->winner_id === $match->participant2_id && $match->winner_id ? 'var(--lime)' : '#fff' }};font-size:13px;">
+                            <div class="rr-match-row {{ $match->winner_id === $match->participant2_id && $match->winner_id ? 'is-winner' : '' }}" style="display:flex;justify-content:space-between;font-size:13px;">
                                 <span>{{ $match->participant2?->display_name ?? 'TBD' }}</span>
                                 <strong>{{ $match->sets->sum('participant2_score') }}</strong>
                             </div>
@@ -224,12 +262,15 @@
                                              data-match-id="{{ $match->id }}"
                                              data-next-match-id="{{ $isFinal ? 'champion' : $match->next_match_id }}"
                                              data-has-winner="{{ $match->winner_id ? '1' : '0' }}"
+                                             data-p1="{{ $match->participant1?->display_name ?? 'TBD' }}"
+                                             data-p2="{{ $match->participant2?->display_name ?? 'TBD' }}"
+                                             data-sets="{{ json_encode($match->sets) }}"
                                              @if (!$isBye)
-                                             onclick="if(isDraggingActive) return; openScoreModal({{ $match->id }}, '{{ addslashes($match->participant1?->display_name ?? 'TBD') }}', '{{ addslashes($match->participant2?->display_name ?? 'TBD') }}', {{ json_encode($match->sets) }})"
-                                             ondragover="handleDragOver(event, {{ $match->id }})"
-                                             ondragenter="handleDragEnter(event, {{ $match->id }})"
-                                             ondragleave="handleDragLeave(event, {{ $match->id }})"
-                                             ondrop="handleDrop(event, {{ $match->id }})"
+                                             onclick="if(isDraggingActive) return; openScoreModalFromElement(this)"
+                                             ondragover="handleDragOver(event, this)"
+                                             ondragenter="handleDragEnter(event, this)"
+                                             ondragleave="handleDragLeave(event, this)"
+                                             ondrop="handleDrop(event, this)"
                                              @endif
                                              title="{{ $isBye ? 'Bye match — winner advanced automatically' : 'Click to enter scores or drag player to next match' }}">
 
@@ -353,10 +394,10 @@
                                 <tr style="border-bottom:1px solid var(--border);">
                                     <td style="padding:14px 20px;color:var(--muted);">Round {{ $match->round_number }}</td>
                                     <td style="padding:14px 16px;">M{{ $match->match_number }}</td>
-                                    <td style="padding:14px 16px;color:{{ $match->winner_id === $match->participant1_id && $match->winner_id ? 'var(--lime)' : '#fff' }};font-weight:{{ $match->winner_id === $match->participant1_id && $match->winner_id ? '700' : '400' }};">
+                                    <td class="match-cell {{ $match->winner_id === $match->participant1_id && $match->winner_id ? 'is-winner' : '' }}" style="padding:14px 16px;">
                                         {{ $match->participant1?->display_name ?? 'TBD' }}
                                     </td>
-                                    <td style="padding:14px 16px;color:{{ $match->winner_id === $match->participant2_id && $match->winner_id ? 'var(--lime)' : '#fff' }};font-weight:{{ $match->winner_id === $match->participant2_id && $match->winner_id ? '700' : '400' }};">
+                                    <td class="match-cell {{ $match->winner_id === $match->participant2_id && $match->winner_id ? 'is-winner' : '' }}" style="padding:14px 16px;">
                                         {{ $match->participant2?->display_name ?? 'TBD' }}
                                     </td>
                                     <td style="padding:14px 16px;">
@@ -375,7 +416,11 @@
                                     <td style="padding:14px 20px;text-align:right;">
                                         <button type="button" class="btn btn-outline btn-sm"
                                                 style="padding:4px 10px;font-size:11px;"
-                                                onclick="openScoreModal({{ $match->id }}, '{{ addslashes($match->participant1?->display_name ?? 'TBD') }}', '{{ addslashes($match->participant2?->display_name ?? 'TBD') }}', {{ json_encode($match->sets) }})">
+                                                data-match-id="{{ $match->id }}"
+                                                data-p1="{{ $match->participant1?->display_name ?? 'TBD' }}"
+                                                data-p2="{{ $match->participant2?->display_name ?? 'TBD' }}"
+                                                data-sets="{{ json_encode($match->sets) }}"
+                                                onclick="openScoreModalFromElement(this)">
                                             Record Score
                                         </button>
                                     </td>
@@ -391,10 +436,24 @@
     {{-- ════════════════════════ PARTICIPANTS TAB ═════════════════════ --}}
     <div class="tab-pane" id="tab-pane-participants" style="display:none;">
         <div class="admin-panel">
-            <div class="admin-panel-head">
+            <div class="admin-panel-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--border);padding-bottom:16px;">
                 <div>
-                    <h2>Registered Entrants</h2>
-                    <p>{{ $tournament->participants->count() }} / {{ $tournament->max_participants }} spots filled.</p>
+                    <h2 style="margin:0;font-size:18px;color:#fff;">Registered Entrants</h2>
+                    <p style="margin:4px 0 0;font-size:12px;color:var(--muted);">{{ $tournament->participants->count() }} / {{ $tournament->max_participants }} spots filled.</p>
+                </div>
+                <div style="display:inline-flex;gap:8px;flex-wrap:wrap;">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="openAddParticipantModal()" style="font-size:12px;padding:6px 12px;border-radius:6px;color:#fff;border-color:var(--border);background:rgba(255,255,255,0.02);cursor:pointer;">
+                        Add Participant
+                    </button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="openImportModal()" style="font-size:12px;padding:6px 12px;border-radius:6px;color:#fff;border-color:var(--border);background:rgba(255,255,255,0.02);cursor:pointer;">
+                        Import CSV
+                    </button>
+                    <a href="{{ route('admin.tournaments.participants.export', $tournament) }}" class="btn btn-outline btn-sm" style="font-size:12px;padding:6px 12px;border-radius:6px;color:#fff;border-color:var(--border);background:rgba(255,255,255,0.02);text-decoration:none;display:inline-flex;align-items:center;">
+                        Export CSV
+                    </a>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="openAnnouncementModal()" style="font-size:12px;padding:6px 12px;border-radius:6px;background:var(--lime);color:#000;font-weight:700;border:none;cursor:pointer;">
+                        Send Announcement
+                    </button>
                 </div>
             </div>
 
@@ -440,13 +499,33 @@
                                         {{ $p->status }}
                                     </td>
                                     <td style="padding:14px 20px;text-align:right;">
-                                        <form method="POST" action="{{ route('admin.participants.check-in', $p) }}" style="display:inline;">
-                                            @csrf
-                                            <button type="submit" class="btn btn-outline btn-sm"
-                                                    style="padding:4px 10px;font-size:11px;">
-                                                {{ $p->checked_in ? 'Check Out' : 'Check In' }}
+                                        <div style="display:inline-flex;gap:6px;align-items:center;">
+                                            <form method="POST" action="{{ route('admin.participants.check-in', $p) }}" style="display:inline;">
+                                                @csrf
+                                                <button type="submit" class="btn btn-outline btn-sm"
+                                                        style="padding:4px 10px;font-size:11px;border-radius:4px;cursor:pointer;">
+                                                    {{ $p->checked_in ? 'Check Out' : 'Check In' }}
+                                                </button>
+                                            </form>
+                                            
+                                            <button type="button" class="btn btn-outline btn-sm"
+                                                    style="padding:4px 10px;font-size:11px;border-radius:4px;color:#fff;border-color:var(--border);background:rgba(255,255,255,0.02);cursor:pointer;"
+                                                    data-id="{{ $p->id }}"
+                                                    data-seed="{{ $p->seed }}"
+                                                    data-name="{{ $p->display_name }}"
+                                                    onclick="openEditSeedModal(this.getAttribute('data-id'), this.getAttribute('data-seed'), this.getAttribute('data-name'))">
+                                                Seed
                                             </button>
-                                        </form>
+
+                                            <form method="POST" action="{{ route('admin.participants.destroy', $p) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to remove this participant?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-outline btn-sm"
+                                                        style="padding:4px 10px;font-size:11px;border-radius:4px;color:#ef4444;border-color:rgba(239,68,68,0.2);background:transparent;cursor:pointer;">
+                                                    Remove
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -674,6 +753,14 @@
     }
 
     /* ── Score Modal ─────────────────────────────────────────────── */
+    function openScoreModalFromElement(btn) {
+        const matchId = btn.getAttribute('data-match-id');
+        const p1Name = btn.getAttribute('data-p1');
+        const p2Name = btn.getAttribute('data-p2');
+        const existingSets = JSON.parse(btn.getAttribute('data-sets') || '[]');
+        openScoreModal(matchId, p1Name, p2Name, existingSets);
+    }
+
     function openScoreModal(matchId, p1Name, p2Name, existingSets) {
         const backdrop = document.getElementById('score-modal-backdrop');
         const form = document.getElementById('score-form');
@@ -733,14 +820,20 @@
         }, 80);
     }
 
-    function handleDragOver(e, targetMatchId) {
+    function getTargetMatchId(target) {
+        return (target && typeof target === 'object') ? target.getAttribute('data-match-id') : target;
+    }
+
+    function handleDragOver(e, target) {
+        const targetMatchId = getTargetMatchId(target);
         if (currentDragData && String(currentDragData.nextMatchId) === String(targetMatchId)) {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
         }
     }
 
-    function handleDragEnter(e, targetMatchId) {
+    function handleDragEnter(e, target) {
+        const targetMatchId = getTargetMatchId(target);
         if (currentDragData && String(currentDragData.nextMatchId) === String(targetMatchId)) {
             e.preventDefault();
             const card = document.getElementById('match-' + targetMatchId);
@@ -751,7 +844,8 @@
         }
     }
 
-    function handleDragLeave(e, targetMatchId) {
+    function handleDragLeave(e, target) {
+        const targetMatchId = getTargetMatchId(target);
         const card = document.getElementById('match-' + targetMatchId);
         if (card) {
             card.style.borderColor = '';
@@ -759,7 +853,8 @@
         }
     }
 
-    function handleDrop(e, targetMatchId) {
+    function handleDrop(e, target) {
+        const targetMatchId = getTargetMatchId(target);
         e.preventDefault();
         try {
             const data = JSON.parse(e.dataTransfer.getData('text/plain'));
@@ -854,6 +949,29 @@
         });
     })();
 
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+    }
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+    function openAddParticipantModal() {
+        openModal('add-participant-modal-backdrop');
+    }
+    function openImportModal() {
+        openModal('import-participants-modal-backdrop');
+    }
+    function openAnnouncementModal() {
+        openModal('announcement-modal-backdrop');
+    }
+    function openEditSeedModal(id, seed, name) {
+        const form = document.getElementById('edit-seed-form');
+        form.action = '/admin/participants/' + id + '/seed';
+        document.getElementById('edit-seed-name').textContent = name;
+        document.getElementById('edit-seed-input').value = seed;
+        openModal('edit-seed-modal-backdrop');
+    }
+
     // Restore active tab on load
     (function() {
         const savedTab = localStorage.getItem('active_tab_tournament_{{ $tournament->id }}');
@@ -864,4 +982,104 @@
         }
     })();
     </script>
+
+    {{-- Add Participant Modal --}}
+    <div id="add-participant-modal-backdrop" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:999;display:none;align-items:center;justify-content:center;">
+        <div style="background:var(--surface-3);border:1px solid var(--border);border-radius:12px;width:100%;max-width:480px;padding:24px;position:relative;box-sizing:border-box;">
+            <h3 style="margin-top:0;color:#fff;font-family:var(--display-font);text-transform:uppercase;font-size:24px;letter-spacing:1px;margin-bottom:20px;">Add Participant</h3>
+            <form method="POST" action="{{ route('admin.tournaments.participants.add', $tournament) }}">
+                @csrf
+                <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+                    <div>
+                        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">Display Name</label>
+                        <input type="text" name="display_name" required style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:#fff;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">Team Name (Optional)</label>
+                        <input type="text" name="team_name" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:#fff;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">Seed</label>
+                        <input type="number" name="seed" value="1" min="1" required style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:#fff;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">Link User Account (Optional)</label>
+                        <select name="user_id" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:#fff;box-sizing:border-box;">
+                            <option value="">Guest (No user account)</option>
+                            @foreach(\App\Models\User::where('role', 'customer')->get() as $u)
+                                <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->email }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:flex-end;gap:10px;">
+                    <button type="button" onclick="closeModal('add-participant-modal-backdrop')" style="background:none;border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">Cancel</button>
+                    <button type="submit" style="background:var(--lime);color:#000;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">Add Participant</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Edit Seed Modal --}}
+    <div id="edit-seed-modal-backdrop" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:999;display:none;align-items:center;justify-content:center;">
+        <div style="background:var(--surface-3);border:1px solid var(--border);border-radius:12px;width:100%;max-width:400px;padding:24px;position:relative;box-sizing:border-box;">
+            <h3 style="margin-top:0;color:#fff;font-family:var(--display-font);text-transform:uppercase;font-size:24px;letter-spacing:1px;margin-bottom:12px;">Edit Seed</h3>
+            <p style="margin:0 0 20px;font-size:13px;color:var(--muted);">Updating seed for <strong id="edit-seed-name" style="color:#fff;"></strong></p>
+            <form method="POST" id="edit-seed-form" action="">
+                @csrf
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">Seed Number</label>
+                    <input type="number" name="seed" id="edit-seed-input" min="1" required style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:#fff;box-sizing:border-box;">
+                </div>
+                <div style="display:flex;justify-content:flex-end;gap:10px;">
+                    <button type="button" onclick="closeModal('edit-seed-modal-backdrop')" style="background:none;border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">Cancel</button>
+                    <button type="submit" style="background:var(--lime);color:#000;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">Save Seed</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Import CSV Modal --}}
+    <div id="import-participants-modal-backdrop" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:999;display:none;align-items:center;justify-content:center;">
+        <div style="background:var(--surface-3);border:1px solid var(--border);border-radius:12px;width:100%;max-width:440px;padding:24px;position:relative;box-sizing:border-box;">
+            <h3 style="margin-top:0;color:#fff;font-family:var(--display-font);text-transform:uppercase;font-size:24px;letter-spacing:1px;margin-bottom:12px;">Import CSV</h3>
+            <p style="margin:0 0 20px;font-size:13px;color:var(--muted);">Upload a CSV file containing participants. Format should be: <code style="color:var(--lime);">display_name,team_name,seed</code> (header optional).</p>
+            <form method="POST" action="{{ route('admin.tournaments.participants.import', $tournament) }}" enctype="multipart/form-data">
+                @csrf
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">Choose CSV File</label>
+                    <input type="file" name="csv_file" accept=".csv" required style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px;color:#fff;box-sizing:border-box;">
+                </div>
+                <div style="display:flex;justify-content:flex-end;gap:10px;">
+                    <button type="button" onclick="closeModal('import-participants-modal-backdrop')" style="background:none;border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">Cancel</button>
+                    <button type="submit" style="background:var(--lime);color:#000;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">Upload and Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Send Announcement Modal --}}
+    <div id="announcement-modal-backdrop" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:999;display:none;align-items:center;justify-content:center;">
+        <div style="background:var(--surface-3);border:1px solid var(--border);border-radius:12px;width:100%;max-width:500px;padding:24px;position:relative;box-sizing:border-box;">
+            <h3 style="margin-top:0;color:#fff;font-family:var(--display-font);text-transform:uppercase;font-size:24px;letter-spacing:1px;margin-bottom:12px;">Send Announcement</h3>
+            <p style="margin:0 0 20px;font-size:13px;color:var(--muted);">Send a notification message to all registered participants in this tournament.</p>
+            <form method="POST" action="{{ route('admin.tournaments.participants.announce', $tournament) }}">
+                @csrf
+                <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+                    <div>
+                        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">Announcement Title</label>
+                        <input type="text" name="title" placeholder="Tournament Updates" required style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:#fff;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">Message Content</label>
+                        <textarea name="message" rows="4" placeholder="Write your announcement details here..." required style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:#fff;box-sizing:border-box;font-family:inherit;resize:vertical;"></textarea>
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:flex-end;gap:10px;">
+                    <button type="button" onclick="closeModal('announcement-modal-backdrop')" style="background:none;border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">Cancel</button>
+                    <button type="submit" style="background:var(--lime);color:#000;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">Send Announcement</button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection

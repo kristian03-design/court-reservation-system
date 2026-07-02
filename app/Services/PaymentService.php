@@ -34,6 +34,37 @@ class PaymentService
             'status' => 'pending_payment',
         ]);
 
+        \App\Services\AuditLogService::log('payment_proof_uploaded', $payment, [
+            'reservation_number' => $payment->reservation->reservation_number,
+            'amount' => $payment->amount,
+        ]);
+
+        \App\Models\AdminNotification::create([
+            'type'       => 'payment',
+            'title'      => 'Payment Proof Uploaded',
+            'message'    => "{$payment->reservation->user->name} uploaded proof for reservation {$payment->reservation->reservation_number} (₱" . number_format((float) $payment->amount, 2) . ").",
+            'action_url' => route('admin.payments.show', $payment),
+        ]);
+
+        return $payment;
+    }
+
+    public function payWithCard(Payment $payment): Payment
+    {
+        $this->markPaid($payment);
+
+        \App\Services\AuditLogService::log('payment_card_processed', $payment, [
+            'reservation_number' => $payment->reservation->reservation_number,
+            'amount' => $payment->amount,
+        ]);
+
+        \App\Models\AdminNotification::create([
+            'type'       => 'payment',
+            'title'      => 'Instant Payment Completed',
+            'message'    => "{$payment->reservation->user->name} paid via Credit Card for reservation {$payment->reservation->reservation_number} (₱" . number_format((float) $payment->amount, 2) . ").",
+            'action_url' => route('admin.payments.show', $payment),
+        ]);
+
         return $payment;
     }
 

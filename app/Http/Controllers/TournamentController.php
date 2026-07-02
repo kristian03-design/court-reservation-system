@@ -28,7 +28,17 @@ class TournamentController extends Controller
         $active = $tournaments['active'];
         $completed = $tournaments['completed'];
 
-        return view('guest.tournaments.index', compact('upcoming', 'active', 'completed'));
+        // My registered tournaments (for logged-in users)
+        $joinedTournaments = collect();
+        if (auth()->check()) {
+            $joinedTournaments = \App\Models\TournamentParticipant::where('user_id', auth()->id())
+                ->with('tournament')
+                ->get()
+                ->pluck('tournament')
+                ->filter();
+        }
+
+        return view('guest.tournaments.index', compact('upcoming', 'active', 'completed', 'joinedTournaments'));
     }
 
     public function show(Tournament $tournament): View
@@ -55,5 +65,54 @@ class TournamentController extends Controller
         $matchesByRound = $cachedData['matchesByRound'];
 
         return view('guest.tournaments.show', compact('tournament', 'matchesByRound'));
+    }
+
+    public function participants(Tournament $tournament): View
+    {
+        $stats = \Illuminate\Support\Facades\Cache::remember('tournament_stats_' . $tournament->id, 300, function () use ($tournament) {
+            $totalParticipants = $tournament->participants()->count();
+            
+            $teamsCount = $tournament->participants()
+                ->whereNotNull('team_name')
+                ->where('team_name', '!=', '')
+                ->distinct('team_name')
+                ->count('team_name');
+            
+            if ($teamsCount === 0) {
+                $teamsCount = $tournament->participants()
+                    ->where('participant_type', 'team')
+                    ->count();
+            }
+
+            $matchesCount = $tournament->matches()->count();
+            
+            $prizePool = $totalParticipants * $tournament->entry_fee;
+
+            $courtsCount = \DB::table('tournament_schedules')
+                ->join('tournament_matches', 'tournament_schedules.match_id', '=', 'tournament_matches.id')
+                ->where('tournament_matches.tournament_id', $tournament->id)
+                ->distinct('court_id')
+                ->count('court_id');
+
+            if ($courtsCount === 0 && $matchesCount > 0) {
+                $courtsCount = 1;
+            }
+
+            $bracketStatus = $matchesCount > 0 ? 'Generated' : 'Pending';
+
+            return [
+                'total_participants' => $totalParticipants,
+                'teams_count' => $teamsCount,
+                'matches_count' => $matchesCount,
+                'prize_pool' => $prizePool,
+                'courts_count' => $courtsCount,
+                'bracket_status' => $bracketStatus,
+            ];
+        });
+
+        return view('tournaments.participants', [
+            'tournament' => $tournament,
+            'stats' => $stats
+        ]);
     }
 }

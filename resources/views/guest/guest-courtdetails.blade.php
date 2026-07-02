@@ -11,6 +11,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/css/views/guest.css', 'resources/js/app.js'])
+    <style>
+        .text-lime { color: var(--lime) !important; }
+        .text-coral { color: var(--coral) !important; }
+    </style>
 </head>
 <body class="public-page padele-home padele-inner">
     @include('partials.public-header')
@@ -91,7 +95,7 @@
                                 @endif
                             </div>
                             <span class="label">Status</span>
-                            <span class="value" id="court-status-value" style="color:{{ ($court->status === 'available' && !collect($slots)->where('available', true)->isEmpty()) ? 'var(--lime)' : 'var(--coral)' }}">
+                            <span class="value {{ ($court->status === 'available' && !collect($slots)->where('available', true)->isEmpty()) ? 'text-lime' : 'text-coral' }}" id="court-status-value">
                                 @if ($court->status === 'available' && collect($slots)->where('available', true)->isEmpty())
                                     Fully Booked
                                 @else
@@ -301,7 +305,7 @@
                                            id="custom-date-picker" 
                                            min="{{ now()->toDateString() }}" 
                                            max="{{ now()->addDays(30)->toDateString() }}"
-                                           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2;">
+                                           style="position: absolute; top: 0; left: 0; width: 0; height: 0; opacity: 0; pointer-events: none; visibility: hidden;">
                                     <button type="button" 
                                             id="custom-date-btn"
                                             style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 52px; border: 1px solid var(--border); border-radius: var(--radius); background: rgba(255, 255, 255, 0.02); color: var(--muted); cursor: pointer; transition: all var(--transition); font-family: inherit;">
@@ -427,7 +431,7 @@
         const customDateBtn = document.getElementById('custom-date-btn');
 
         const courtId = "{{ $court->id }}";
-        const hourlyRate = {{ $court->hourly_rate }};
+        const hourlyRate = parseFloat("{{ $court->hourly_rate }}");
         const availabilityUrlPattern = "{{ route('courts.availability', ['court' => $court->id]) }}";
         const courtStatus = "{{ $court->status }}";
 
@@ -626,6 +630,22 @@
                 displayDate.textContent = display;
                 
                 fetchAvailability(date);
+            });
+        }
+
+        // Custom date selector button trigger
+        if (customDateBtn && datePicker) {
+            customDateBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (typeof datePicker.showPicker === 'function') {
+                    try {
+                        datePicker.showPicker();
+                    } catch (err) {
+                        datePicker.click();
+                    }
+                } else {
+                    datePicker.click();
+                }
             });
         }
 

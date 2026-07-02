@@ -7,9 +7,11 @@
         ['label' => 'Reserve', 'href' => route('booking.create'), 'active' => request()->routeIs('booking.*'), 'icon' => 'calendar-plus', 'section' => 'Play'],
         ['label' => 'My Slots', 'href' => route('reservations.index'), 'active' => request()->routeIs('reservations.*'), 'icon' => 'clipboard-list', 'section' => 'Play'],
         ['label' => 'Tournaments', 'href' => route('tournaments.index'), 'active' => request()->routeIs('tournaments.*') || request()->routeIs('dashboard.tournaments.*'), 'icon' => 'trophy', 'section' => 'Play'],
+        ['label' => 'Events', 'href' => route('events'), 'active' => request()->routeIs('events*'), 'icon' => 'calendar-days', 'section' => 'Play'],
         ['label' => 'Inbox', 'href' => route('notifications.index'), 'active' => request()->routeIs('notifications.*'), 'icon' => 'mail', 'section' => 'Account'],
         ['label' => 'Profile', 'href' => route('profile.edit'), 'active' => request()->routeIs('profile.*'), 'icon' => 'user-round', 'section' => 'Account'],
         ['label' => 'Payments', 'href' => route('payments.index'), 'active' => request()->routeIs('payments.*'), 'icon' => 'credit-card', 'section' => 'Account'],
+        ['label' => 'My Feedback', 'href' => route('feedback.index'), 'active' => request()->routeIs('feedback.*'), 'icon' => 'message-circle', 'section' => 'Account'],
     ];
 
     $hour = now()->hour;

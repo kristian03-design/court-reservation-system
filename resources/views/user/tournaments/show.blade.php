@@ -1,6 +1,19 @@
 @extends('user.layouts.shell', ['pageTitle' => $tournament->name])
 
 @section('content')
+    <style>
+        .rr-match-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #fff;
+            font-weight: 400;
+        }
+        .rr-match-row.is-winner {
+            color: var(--lime);
+            font-weight: 700;
+        }
+    </style>
     <div style="margin-bottom: 24px; padding: 20px 0 0;">
         <a href="{{ route('dashboard') }}"
            style="color:#fff;text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;background:rgba(255,255,255,0.05);padding:8px 16px;border-radius:8px;border:1px solid var(--border);transition:all 0.15s ease;"
@@ -45,11 +58,11 @@
                             <span class="status status-{{ $match->status }}">{{ $match->status }}</span>
                         </div>
                         <div class="rr-match-card-body">
-                            <div style="display:flex;justify-content:space-between;color:{{ $match->winner_id === $match->participant1_id && $match->winner_id ? 'var(--lime)' : '#fff' }}">
+                            <div class="rr-match-row {{ $match->winner_id === $match->participant1_id && $match->winner_id ? 'is-winner' : '' }}">
                                 <span>{{ $match->participant1?->display_name ?? 'TBD' }}</span>
                                 <strong>{{ $match->sets->sum('participant1_score') }}</strong>
                             </div>
-                            <div style="display:flex;justify-content:space-between;color:{{ $match->winner_id === $match->participant2_id && $match->winner_id ? 'var(--lime)' : '#fff' }}">
+                            <div class="rr-match-row {{ $match->winner_id === $match->participant2_id && $match->winner_id ? 'is-winner' : '' }}">
                                 <span>{{ $match->participant2?->display_name ?? 'TBD' }}</span>
                                 <strong>{{ $match->sets->sum('participant2_score') }}</strong>
                             </div>

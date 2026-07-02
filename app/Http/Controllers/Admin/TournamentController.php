@@ -170,4 +170,125 @@ class TournamentController extends Controller
         $status = $participant->checked_in ? 'checked in' : 'checked out';
         return back()->with('success', "Participant successfully {$status}.");
     }
+
+    public function addParticipant(Request $request, Tournament $tournament): RedirectResponse
+    {
+        $validated = $request->validate([
+            'display_name' => 'required|string|max:255',
+            'team_name' => 'nullable|string|max:255',
+            'seed' => 'required|integer|min:1',
+            'user_id' => 'nullable|exists:users,id',
+        ]);
+
+        $tournament->participants()->create($validated);
+
+        return back()->with('success', 'Participant added successfully.');
+    }
+
+    public function removeParticipant(TournamentParticipant $participant): RedirectResponse
+    {
+        $participant->delete();
+        return back()->with('success', 'Participant removed successfully.');
+    }
+
+    public function updateSeed(Request $request, TournamentParticipant $participant): RedirectResponse
+    {
+        $request->validate(['seed' => 'required|integer|min:1']);
+        $participant->update(['seed' => $request->seed]);
+        return back()->with('success', 'Seed updated successfully.');
+    }
+
+    public function exportParticipants(Tournament $tournament)
+    {
+        $participants = $tournament->participants()->orderBy('seed')->get();
+        $csvFileName = 'tournament_' . $tournament->id . '_participants.csv';
+        
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$csvFileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = ['ID', 'Display Name', 'Team Name', 'Seed', 'Status', 'Wins', 'Losses', 'Matches Played'];
+
+        $callback = function() use($participants, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($participants as $p) {
+                fputcsv($file, [
+                    $p->id,
+                    $p->display_name,
+                    $p->team_name,
+                    $p->seed,
+                    $p->status,
+                    $p->wins,
+                    $p->losses,
+                    $p->matches_played
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function importParticipants(Request $request, Tournament $tournament): RedirectResponse
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt'
+        ]);
+
+        $file = $request->file('csv_file');
+        $filePath = $file->getRealPath();
+
+        $fileHandle = fopen($filePath, 'r');
+        $header = fgetcsv($fileHandle); // skip header
+
+        while (($row = fgetcsv($fileHandle)) !== false) {
+            if (empty($row[0])) continue;
+            
+            $tournament->participants()->create([
+                'display_name' => $row[0],
+                'team_name' => $row[1] ?? null,
+                'seed' => isset($row[2]) ? (int)$row[2] : 1,
+                'status' => 'active',
+            ]);
+        }
+
+        fclose($fileHandle);
+
+        return back()->with('success', 'Participants imported successfully.');
+    }
+
+    public function sendAnnouncement(Request $request, Tournament $tournament): RedirectResponse
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'message' => 'required|string',
+        ]);
+
+        $participants = $tournament->participants()->whereNotNull('user_id')->get();
+        
+        foreach ($participants as $p) {
+            if ($p->user) {
+                $p->user->systemNotifications()->create([
+                    'title' => $request->title,
+                    'message' => $request->message,
+                    'is_read' => false,
+                ]);
+            }
+        }
+
+        $tournament->activityLogs()->create([
+            'admin_id' => auth()->id() ?? \App\Models\User::where('role', 'admin')->first()->id ?? 1,
+            'action' => 'announcement_sent',
+            'changes' => json_encode(['title' => $request->title, 'message' => $request->message]),
+        ]);
+
+        return back()->with('success', 'Announcement sent to all registered participant accounts.');
+    }
 }

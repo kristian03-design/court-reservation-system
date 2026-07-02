@@ -182,7 +182,7 @@
         }
     });
     </script>
-
+0
     @include('partials.public-footer')
     @stack('scripts')
 </body>

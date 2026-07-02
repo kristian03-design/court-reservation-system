@@ -228,16 +228,16 @@
                             @csrf
                             <div style="display: grid; gap: 6px;">
                                 <label style="font-size: 11px; font-weight: 700; color: var(--muted-mid); text-transform: uppercase; letter-spacing: 0.05em;">Card Number</label>
-                                <input type="text" name="card_number" required placeholder="•••• •••• •••• ••••" style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 14px; color: var(--text); outline: none;" maxlength="19">
+                                <input type="text" id="rsv_card_number" name="card_number" required placeholder="•••• •••• •••• ••••" inputmode="numeric" autocomplete="cc-number" style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 14px; color: var(--text); outline: none; letter-spacing: 0.08em; width: 100%; box-sizing: border-box;" maxlength="19">
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                                 <div style="display: grid; gap: 6px;">
                                     <label style="font-size: 11px; font-weight: 700; color: var(--muted-mid); text-transform: uppercase; letter-spacing: 0.05em;">Expiry Date</label>
-                                    <input type="text" name="card_expiry" required placeholder="MM/YY" style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 14px; color: var(--text); outline: none;" maxlength="5">
+                                    <input type="text" id="rsv_card_expiry" name="card_expiry" required placeholder="MM/YY" inputmode="numeric" autocomplete="cc-exp" style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 14px; color: var(--text); outline: none; width: 100%; box-sizing: border-box;" maxlength="5">
                                 </div>
                                 <div style="display: grid; gap: 6px;">
                                     <label style="font-size: 11px; font-weight: 700; color: var(--muted-mid); text-transform: uppercase; letter-spacing: 0.05em;">CVC / CVV</label>
-                                    <input type="text" name="card_cvc" required placeholder="•••" style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 14px; color: var(--text); outline: none;" maxlength="4">
+                                    <input type="text" id="rsv_card_cvc" name="card_cvc" required placeholder="•••" inputmode="numeric" autocomplete="cc-csc" style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 14px; color: var(--text); outline: none; width: 100%; box-sizing: border-box;" maxlength="4">
                                 </div>
                             </div>
                             
@@ -479,6 +479,43 @@
             });
         }
     });
+    </script>
+    <script>
+    // Card number: max 16 digits, auto-space every 4
+    const rsvCardNum = document.getElementById('rsv_card_number');
+    if (rsvCardNum) {
+        rsvCardNum.addEventListener('input', function() {
+            let v = this.value.replace(/\D/g, '').slice(0, 16);
+            this.value = v.replace(/(\d{4})(?=\d)/g, '$1 ');
+        });
+        rsvCardNum.addEventListener('keydown', function(e) {
+            if (!/[\d\s]/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+        });
+    }
+
+    // Expiry: auto-slash after MM
+    const rsvExpiry = document.getElementById('rsv_card_expiry');
+    if (rsvExpiry) {
+        rsvExpiry.addEventListener('input', function() {
+            let v = this.value.replace(/\D/g, '').slice(0, 4);
+            if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+            this.value = v;
+        });
+        rsvExpiry.addEventListener('keydown', function(e) {
+            if (!/[\d\/]/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+        });
+    }
+
+    // CVC: digits only, max 4
+    const rsvCvc = document.getElementById('rsv_card_cvc');
+    if (rsvCvc) {
+        rsvCvc.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+        });
+        rsvCvc.addEventListener('keydown', function(e) {
+            if (!/[\d]/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+        });
+    }
     </script>
     @endpush
 @endsection

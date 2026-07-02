@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CourtController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -22,9 +23,11 @@ Route::view('/privacy-policy', 'guest.privacy-policy')->name('privacy');
 Route::view('/terms-of-service', 'guest.terms-of-service')->name('terms');
 Route::get('/courts', [CourtController::class, 'index'])->name('courts.index')->middleware('throttle:api.search');
 Route::get('/availability', [CourtController::class, 'globalAvailability'])->name('availability')->middleware('throttle:api.search');
-Route::view('/events', 'guest.guest-events')->name('events');
+Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('events');
+Route::get('/events/{slug}', [App\Http\Controllers\EventController::class, 'show'])->name('events.show');
 Route::get('/tournaments', [App\Http\Controllers\TournamentController::class, 'index'])->name('tournaments');
 Route::get('/tournaments/{tournament}', [App\Http\Controllers\TournamentController::class, 'show'])->name('tournaments.show');
+Route::get('/tournaments/{tournament}/participants', [App\Http\Controllers\TournamentController::class, 'participants'])->name('tournaments.participants');
 Route::get('/tournaments-list', [App\Http\Controllers\TournamentController::class, 'index'])->name('tournaments.index');
 Route::get('/courts/{court}', [CourtController::class, 'show'])->name('courts.show');
 Route::get('/courts/{court}/availability', [CourtController::class, 'availability'])->name('courts.availability')->middleware('throttle:api.search');
@@ -78,6 +81,14 @@ Route::middleware(['auth:web', 'verified', 'role:customer'])->group(function () 
     Route::post('/notifications/read-all', [DashboardController::class, 'markAllNotificationsRead'])->name('notifications.read-all');
     Route::get('/billing', [DashboardController::class, 'billing'])->name('payments.index');
     Route::get('/dashboard/tournaments/{tournament}', [DashboardController::class, 'tournamentShow'])->name('dashboard.tournaments.show');
+    
+    Route::get('/events/{slug}/register', [App\Http\Controllers\EventController::class, 'registerForm'])->name('events.register');
+    Route::post('/events/{slug}/register', [App\Http\Controllers\EventController::class, 'submitRegistration'])->name('events.submit-register');
+
+    // Player Feedback
+    Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
+    Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+    Route::delete('/feedback', [FeedbackController::class, 'destroy'])->name('feedback.destroy');
 });
 
 Route::redirect('/admin/dashboard', '/admin')
@@ -107,8 +118,27 @@ Route::prefix('admin')
         Route::post('/tournaments/{tournament}/schedule', [Admin\TournamentController::class, 'scheduleMatches'])->name('tournaments.schedule');
         Route::post('/matches/{match}/score', [Admin\TournamentController::class, 'updateScore'])->name('matches.update-score');
         Route::post('/participants/{participant}/check-in', [Admin\TournamentController::class, 'checkIn'])->name('participants.check-in');
+        
+        Route::post('/tournaments/{tournament}/participants/add', [Admin\TournamentController::class, 'addParticipant'])->name('tournaments.participants.add');
+        Route::delete('/participants/{participant}', [Admin\TournamentController::class, 'removeParticipant'])->name('participants.destroy');
+        Route::post('/tournaments/{tournament}/participants/import', [Admin\TournamentController::class, 'importParticipants'])->name('tournaments.participants.import');
+        Route::post('/participants/{participant}/seed', [Admin\TournamentController::class, 'updateSeed'])->name('participants.update-seed');
+        Route::get('/tournaments/{tournament}/participants/export', [Admin\TournamentController::class, 'exportParticipants'])->name('tournaments.participants.export');
+        Route::post('/tournaments/{tournament}/participants/announce', [Admin\TournamentController::class, 'sendAnnouncement'])->name('tournaments.participants.announce');
+
+        Route::resource('events', Admin\EventController::class);
+        Route::post('/events/{event}/duplicate', [Admin\EventController::class, 'duplicate'])->name('events.duplicate');
+        Route::post('/events/{event}/publish', [Admin\EventController::class, 'togglePublish'])->name('events.publish');
+        Route::get('/events/{event}/registrants', [Admin\EventController::class, 'registrants'])->name('events.registrants');
+        Route::post('/registrations/{registration}/status', [Admin\EventController::class, 'updateRegistrationStatus'])->name('registrations.update-status');
+        Route::post('/registrations/{registration}/payment', [Admin\EventController::class, 'updatePaymentStatus'])->name('registrations.update-payment');
 
         // Admin notifications
         Route::post('/notifications/{notification}/read', [Admin\NotificationController::class, 'markRead'])->name('notifications.read');
         Route::post('/notifications/read-all', [Admin\NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
+        // Testimonials / Player Feedback management
+        Route::get('/testimonials', [Admin\TestimonialController::class, 'index'])->name('testimonials.index');
+        Route::post('/testimonials/{testimonial}/toggle', [Admin\TestimonialController::class, 'toggle'])->name('testimonials.toggle');
+        Route::delete('/testimonials/{testimonial}', [Admin\TestimonialController::class, 'destroy'])->name('testimonials.destroy');
     });

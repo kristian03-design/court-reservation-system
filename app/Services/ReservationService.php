@@ -79,8 +79,31 @@ class ReservationService
                 'amount' => $reservation->total_amount,
             ]);
 
+            \App\Models\AdminNotification::create([
+                'type'       => 'reservation',
+                'title'      => 'New Reservation',
+                'message'    => "{$user->name} booked {$court->court_name} on " . \Carbon\Carbon::parse($reservation->reservation_date)->format('M d, Y') . " ({$reservation->start_time} – {$reservation->end_time}).",
+                'action_url' => route('admin.reservations.show', $reservation),
+            ]);
+
             return $reservation->load(['court', 'payment']);
         });
+    }
+
+    public function cancel(Reservation $reservation): void
+    {
+        $reservation->update(['status' => 'cancelled']);
+
+        \App\Services\AuditLogService::log('reservation_cancelled', $reservation, [
+            'reservation_number' => $reservation->reservation_number,
+        ]);
+
+        \App\Models\AdminNotification::create([
+            'type'       => 'reservation',
+            'title'      => 'Reservation Cancelled',
+            'message'    => "{$reservation->user->name} cancelled reservation {$reservation->reservation_number}.",
+            'action_url' => route('admin.reservations.show', $reservation),
+        ]);
     }
 
     public function calculateTotal(Court $court, string $startTime, string $endTime): float

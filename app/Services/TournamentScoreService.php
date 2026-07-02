@@ -99,5 +99,72 @@ class TournamentScoreService
         if ($totalUnfinished === 0) {
             $tournament->update(['status' => 'completed']);
         }
+
+        $this->recalculateParticipantStats($tournament);
+    }
+
+    /**
+     * Recalculate all participant stats based on match outcomes.
+     */
+    public function recalculateParticipantStats(\App\Models\Tournament $tournament): void
+    {
+        // Reset all stats for this tournament's participants
+        $tournament->participants()->update([
+            'wins' => 0,
+            'losses' => 0,
+            'matches_played' => 0,
+            'is_eliminated' => false,
+            'status' => 'active',
+        ]);
+
+        // Load finished matches for this tournament
+        $matches = $tournament->matches()
+            ->where('status', 'finished')
+            ->get();
+
+        foreach ($matches as $match) {
+            if ($match->winner_id) {
+                $winner = $tournament->participants()->find($match->winner_id);
+                if ($winner) {
+                    $winner->increment('wins');
+                    $winner->increment('matches_played');
+                }
+            }
+
+            if ($match->loser_id) {
+                $loser = $tournament->participants()->find($match->loser_id);
+                if ($loser) {
+                    $loser->increment('losses');
+                    $loser->increment('matches_played');
+                }
+            }
+        }
+
+        // Determine elimination state based on tournament format
+        $participants = $tournament->participants()->get();
+        foreach ($participants as $p) {
+            if ($tournament->type === 'single') {
+                if ($p->losses >= 1) {
+                    $p->update(['is_eliminated' => true, 'status' => 'eliminated']);
+                }
+            } elseif ($tournament->type === 'double') {
+                if ($p->losses >= 2) {
+                    $p->update(['is_eliminated' => true, 'status' => 'eliminated']);
+                }
+            }
+        }
+
+        // Update champion if tournament is completed
+        if ($tournament->status === 'completed') {
+            $championshipMatch = $tournament->matches()
+                ->where('round_number', $tournament->matches()->max('round_number'))
+                ->first();
+            if ($championshipMatch && $championshipMatch->winner_id) {
+                $champion = $tournament->participants()->find($championshipMatch->winner_id);
+                if ($champion) {
+                    $champion->update(['status' => 'champion']);
+                }
+            }
+        }
     }
 }

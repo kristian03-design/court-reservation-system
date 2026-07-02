@@ -442,6 +442,28 @@ class ExampleTest extends TestCase
             ->assertSee('TEST YOUR LIMITS')
             ->assertSee('Summer Smash Open');
 
+        // Create an event to ensure events page renders it
+        \App\Models\Event::create([
+            'title' => 'Weekend Social Mixer',
+            'slug' => 'weekend-social-mixer',
+            'sport' => 'Social Play',
+            'event_type' => 'Weekly Session',
+            'description' => 'Show up solo or with friends.',
+            'image' => 'images/courtconnect-multisport-hero.png',
+            'price' => 150.00,
+            'max_slots' => 48,
+            'registered' => 0,
+            'start_date' => now()->next('Saturday')->toDateString(),
+            'start_time' => '16:00:00',
+            'end_time' => '20:00:00',
+            'location' => 'CourtConnect Main Arena',
+            'requires_payment' => true,
+            'allow_waitlist' => true,
+            'featured' => true,
+            'published' => true,
+            'status' => 'open',
+        ]);
+
         // 2. Events Page
         $this->get(route('events'))
             ->assertOk()

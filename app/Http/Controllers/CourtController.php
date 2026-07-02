@@ -15,7 +15,7 @@ class CourtController extends Controller
         $isDefault = !$request->search && !$request->type && !$request->sort;
 
         if ($isDefault) {
-            $page = $request->get('page', 1);
+            $page = $request->input('page', 1);
             $courts = \Illuminate\Support\Facades\Cache::remember("courts_list_page_{$page}", 3600, function () {
                 return Court::latest()->paginate(9);
             });
@@ -62,7 +62,7 @@ class CourtController extends Controller
             ->where('status', 'available')
             ->get();
 
-        $courtsWithSlots = $courts->map(function ($court) use ($date, $availabilityService) {
+        $courtsWithSlots = $courts->map(function (Court $court) use ($date, $availabilityService) {
             return [
                 'court' => $court,
                 'slots' => $availabilityService->dailySlots($court, $date),

@@ -19,6 +19,19 @@ class DashboardController extends Controller
             ->pluck('tournament')
             ->filter();
 
+        $joinedEvents = $user->eventRegistrations()
+            ->with('event')
+            ->get()
+            ->pluck('event')
+            ->filter();
+
+        $upcomingEvents = \App\Models\Event::where('published', true)
+            ->where('status', 'open')
+            ->whereDate('start_date', '>=', today())
+            ->whereNotIn('id', $joinedEvents->pluck('id'))
+            ->take(3)
+            ->get();
+
         return view('user.user-dashboard', [
             'upcoming' => $user->reservations()
                 ->with(['court', 'payment'])
@@ -33,6 +46,8 @@ class DashboardController extends Controller
                 'history' => $user->reservations()->count(),
             ],
             'joinedTournaments' => $joinedTournaments,
+            'joinedEvents' => $joinedEvents,
+            'upcomingEvents' => $upcomingEvents,
         ]);
     }
 
