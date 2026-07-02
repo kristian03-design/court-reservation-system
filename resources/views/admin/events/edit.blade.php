@@ -80,13 +80,13 @@
             <div class="cf-grid-2" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
                 <div class="cf-field">
                     <label class="cf-label" for="start_date" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600;">Start Date <span class="cf-required" style="color:#ef4444;">*</span></label>
-                    <input id="start_date" type="date" name="start_date" value="{{ old('start_date', $event->start_date ? $event->start_date->format('Y-m-d') : '') }}" class="cf-input @error('start_date') is-error @enderror" style="width:100%; background:var(--surface-3); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:#fff; box-sizing:border-box;" required>
+                    <input id="start_date" type="date" name="start_date" value="{{ old('start_date', $event->start_date ? \Carbon\Carbon::parse($event->start_date)->format('Y-m-d') : '') }}" class="cf-input @error('start_date') is-error @enderror" style="width:100%; background:var(--surface-3); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:#fff; box-sizing:border-box;" required>
                     @error('start_date')<span class="cf-error" style="color:#ef4444; font-size:11px; margin-top:4px; display:block;">{{ $message }}</span>@enderror
                 </div>
 
                 <div class="cf-field">
                     <label class="cf-label" for="end_date" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600;">End Date (Optional)</label>
-                    <input id="end_date" type="date" name="end_date" value="{{ old('end_date', $event->end_date ? $event->end_date->format('Y-m-d') : '') }}" class="cf-input @error('end_date') is-error @enderror" style="width:100%; background:var(--surface-3); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:#fff; box-sizing:border-box;">
+                    <input id="end_date" type="date" name="end_date" value="{{ old('end_date', $event->end_date ? \Carbon\Carbon::parse($event->end_date)->format('Y-m-d') : '') }}" class="cf-input @error('end_date') is-error @enderror" style="width:100%; background:var(--surface-3); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:#fff; box-sizing:border-box;">
                     @error('end_date')<span class="cf-error" style="color:#ef4444; font-size:11px; margin-top:4px; display:block;">{{ $message }}</span>@enderror
                 </div>
             </div>
@@ -167,13 +167,27 @@
             </div>
 
             <div class="cf-field" style="margin-bottom:20px;">
-                <label class="cf-label" for="image" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600;">Cover Image</label>
-                @if($event->image)
-                    <div style="margin-bottom:10px;">
-                        <img src="{{ asset($event->image) }}" alt="Preview" style="width:100%; max-height:120px; object-fit:cover; border-radius:6px; border:1px solid var(--border);">
+                <label class="cf-label" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600;">Cover Image</label>
+                
+                {{-- Drop Zone --}}
+                <div id="image-drop-zone" style="border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; background: var(--surface-3); cursor: pointer; transition: all 0.2s ease-in-out; position: relative;">
+                    {{-- Hidden input --}}
+                    <input id="image" type="file" name="image" class="cf-input @error('image') is-error @enderror" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
+                    
+                    <div id="drop-zone-prompt" style="display: {{ $event->image ? 'none' : 'block' }}; pointer-events: none;">
+                        <i class="ti ti-upload" style="font-size: 32px; color: var(--lime); margin-bottom: 8px; display: block;"></i>
+                        <span style="font-size: 13px; color: #fff; font-weight: 500; display: block;">Drag & drop image here or click to browse</span>
+                        <span style="font-size: 11px; color: var(--muted); display: block; margin-top: 4px;">Supports PNG, JPG, WEBP (Max 4MB)</span>
                     </div>
-                @endif
-                <input id="image" type="file" name="image" class="cf-input @error('image') is-error @enderror" style="width:100%; background:var(--surface-3); border:1px solid var(--border); border-radius:8px; padding:8px; color:#fff; box-sizing:border-box; font-size:12px;">
+
+                    {{-- Image Preview --}}
+                    <div id="image-preview-container" style="display: {{ $event->image ? 'block' : 'none' }}; pointer-events: none; position: relative;">
+                        <img id="image-preview" src="{{ $event->image ? asset(ltrim($event->image, '/')) : '' }}" alt="Cover Preview" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border);">
+                        <div id="change-image-overlay" style="margin-top: 8px; font-size: 11px; color: var(--lime); font-weight: 600;">
+                            <i class="ti ti-replace" style="font-size: 12px; vertical-align: middle;"></i> Click or drag to replace image
+                        </div>
+                    </div>
+                </div>
                 @error('image')<span class="cf-error" style="color:#ef4444; font-size:11px; margin-top:4px; display:block;">{{ $message }}</span>@enderror
             </div>
 
@@ -204,4 +218,47 @@
         </div>
     </div>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const dropZone = document.getElementById('image-drop-zone');
+    const fileInput = document.getElementById('image');
+    const previewContainer = document.getElementById('image-preview-container');
+    const previewImg = document.getElementById('image-preview');
+    const promptDiv = document.getElementById('drop-zone-prompt');
+
+    if (dropZone && fileInput) {
+        // Drag events
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = 'var(--lime)';
+                dropZone.style.background = 'rgba(191,255,0,0.02)';
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = 'var(--border)';
+                dropZone.style.background = 'var(--surface-3)';
+            }, false);
+        });
+
+        // Handle file select/change
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    previewImg.src = event.target.result;
+                    promptDiv.style.display = 'none';
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
 @endsection

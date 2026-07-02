@@ -229,8 +229,8 @@
                             @endphp
                             {{-- Event Card --}}
                             <article class="cc-court-card scroll-reveal reveal-fade-up stagger-{{ $loop->iteration }}" style="display: flex; flex-direction: column;">
-                                <div class="cc-court-image">
-                                    <img src="{{ $event->image ? asset($event->image) : asset('images/courtconnect-multisport-hero.png') }}" alt="{{ $event->title }}" style="filter: brightness(0.65) saturate(0.85); object-fit: cover; width:100%; height:200px;">
+                                <div class="cc-court-image" style="aspect-ratio: 16/9;">
+                                    <img src="{{ $event->image ? asset(ltrim($event->image, '/')) : asset('images/courtconnect-multisport-hero.webp') }}" alt="{{ $event->title }}" style="filter: brightness(0.65) saturate(0.85);">
                                     <span class="sport-badge" style="background: var(--lime); color: var(--bg);">{{ $event->sport }}</span>
                                 </div>
                                 <div class="cc-court-body" style="gap: 12px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; flex: 1;">
@@ -256,23 +256,23 @@
                                         </div>
                                         <div style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 8px;">
                                             @if($event->status === 'closed' || $event->status === 'completed' || $event->status === 'cancelled')
-                                                <button disabled class="btn btn-outline" style="width: 100%; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; opacity: 0.5;">Closed</button>
+                                                <button disabled class="btn-card" style="width: 100%; opacity: 0.5; cursor: not-allowed;">Closed</button>
                                             @elseif($event->registered >= $event->max_slots)
                                                 @if($event->allow_waitlist)
-                                                    <div style="display: flex; gap: 8px;">
-                                                        <a href="{{ route('events.show', $event->slug) }}" class="btn btn-outline" style="flex: 1; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; text-decoration: none; text-align: center; display: block; line-height: 38px; box-sizing: border-box; border-color: var(--border); color: var(--text);">Details</a>
-                                                        <a href="{{ route('events.show', $event->slug) }}" class="btn btn-outline" style="flex: 1; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; color: var(--lime); border-color: var(--lime); text-decoration: none; text-align: center; display: block; line-height: 38px; box-sizing: border-box;">Join Waitlist</a>
+                                                    <div class="cc-card-actions">
+                                                        <a href="{{ route('events.show', $event->slug) }}" class="btn-card" style="flex: 1; text-align: center;">Details</a>
+                                                        <a href="{{ route('events.show', $event->slug) }}" class="btn-card" style="flex: 1; text-align: center; border-color: var(--lime); color: var(--lime);">Join Waitlist</a>
                                                     </div>
                                                 @else
-                                                    <div style="display: flex; gap: 8px;">
-                                                        <a href="{{ route('events.show', $event->slug) }}" class="btn btn-outline" style="flex: 1; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; text-decoration: none; text-align: center; display: block; line-height: 38px; box-sizing: border-box; border-color: var(--border); color: var(--text);">Details</a>
-                                                        <button disabled class="btn btn-outline" style="flex: 1; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; opacity: 0.5;">Sold Out</button>
+                                                    <div class="cc-card-actions">
+                                                        <a href="{{ route('events.show', $event->slug) }}" class="btn-card" style="flex: 1; text-align: center;">Details</a>
+                                                        <button disabled class="btn-card" style="flex: 1; opacity: 0.5; cursor: not-allowed;">Sold Out</button>
                                                     </div>
                                                 @endif
                                             @else
-                                                <div style="display: flex; gap: 8px;">
-                                                    <a href="{{ route('events.show', $event->slug) }}" class="btn btn-outline" style="flex: 1; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; text-decoration: none; text-align: center; display: block; line-height: 38px; box-sizing: border-box; border-color: var(--border); color: var(--text);">Details</a>
-                                                    <a href="{{ route('events.show', $event->slug) }}" class="btn btn-primary" style="flex: 1; min-height: 40px; font-family: var(--display-font); font-size: 16px; letter-spacing: 0.04em; text-decoration: none; text-align: center; display: block; line-height: 40px; box-sizing: border-box; background: var(--lime); color: #000; border: none; font-weight: 700;">{{ $btnText }}</a>
+                                                <div class="cc-card-actions">
+                                                    <a href="{{ route('events.show', $event->slug) }}" class="btn-card" style="flex: 1; text-align: center;">Details</a>
+                                                    <a href="{{ route('events.register', $event->slug) }}" class="btn-card btn-card-primary" style="flex: 1; text-align: center;">{{ $btnText }}</a>
                                                 </div>
                                             @endif
                                         </div>

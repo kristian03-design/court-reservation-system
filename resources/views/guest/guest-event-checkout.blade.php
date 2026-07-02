@@ -32,7 +32,7 @@
 
                 {{-- Event Summary Card --}}
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 28px; display: flex; gap: 16px; align-items: center;">
-                    <img src="{{ $event->image ? asset($event->image) : asset('images/courtconnect-multisport-hero.png') }}" alt="Event" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border);">
+                    <img src="{{ $event->image ? asset(ltrim($event->image, '/')) : asset('images/courtconnect-multisport-hero.webp') }}" alt="Event" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border);">
                     <div>
                         <span style="font-size: 10px; font-weight: 700; color: var(--lime); text-transform: uppercase; display: block; margin-bottom: 4px;">{{ $event->sport }} · {{ $event->event_type }}</span>
                         <strong style="color: #fff; font-size: 18px; display: block;">{{ $event->title }}</strong>

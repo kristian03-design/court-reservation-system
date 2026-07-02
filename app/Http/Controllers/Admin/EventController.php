@@ -96,13 +96,12 @@ class EventController extends Controller
         }
         $validated['slug'] = $slug;
 
-        // Image upload
+        // Image upload — use Storage::disk('public') so it works on Vercel (read-only public_path)
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            // Store publically so it is served correctly
-            $file->move(public_path('storage/events'), $fileName);
-            $validated['image'] = 'storage/events/' . $fileName;
+            $path = $file->storeAs('events', $fileName, 'public');
+            $validated['image'] = 'storage/' . $path;
         }
 
         $event = Event::create($validated);
@@ -160,13 +159,14 @@ class EventController extends Controller
 
         if ($request->hasFile('image')) {
             // Delete old public image if exists
-            if ($event->image && file_exists(public_path($event->image))) {
-                @unlink(public_path($event->image));
+            if ($event->image) {
+                $oldPath = ltrim(str_replace('storage/', '', $event->image), '/');
+                Storage::disk('public')->delete($oldPath);
             }
             $file = $request->file('image');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('storage/events'), $fileName);
-            $validated['image'] = 'storage/events/' . $fileName;
+            $path = $file->storeAs('events', $fileName, 'public');
+            $validated['image'] = 'storage/' . $path;
         }
 
         $event->update($validated);
@@ -270,10 +270,13 @@ class EventController extends Controller
     private function notifyUsersAboutEvent(Event $event): void
     {
         $users = \App\Models\User::where('role', 'customer')->get();
+        $startDateFormatted = $event->start_date
+            ? (\Carbon\Carbon::parse($event->start_date)->format('M d, Y'))
+            : 'TBA';
         foreach ($users as $user) {
             $user->systemNotifications()->create([
                 'title' => 'New Event: ' . $event->title,
-                'message' => "An exciting new {$event->sport} session ({$event->event_type}) is now open for registration! Join us on " . $event->start_date->format('M d, Y') . '.',
+                'message' => "An exciting new {$event->sport} session ({$event->event_type}) is now open for registration! Join us on " . $startDateFormatted . '.',
                 'is_read' => false,
             ]);
         }

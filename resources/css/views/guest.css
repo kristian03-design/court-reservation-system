@@ -914,6 +914,7 @@ input[type="submit"]:hover {
     display: flex;
     gap: 8px;
     align-items: center;
+    width: 100%;
 }
 
 /* Ghost btn on card → lime fill on hover */

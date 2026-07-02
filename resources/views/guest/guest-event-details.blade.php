@@ -35,7 +35,7 @@
                 <div>
                     {{-- Cover Image --}}
                     <div style="position: relative; border-radius: 16px; overflow: hidden; height: 380px; border: 1px solid var(--border); margin-bottom: 32px;">
-                        <img src="{{ $event->image ? asset($event->image) : asset('images/courtconnect-multisport-hero.png') }}" alt="{{ $event->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="{{ $event->image ? asset(ltrim($event->image, '/')) : asset('images/courtconnect-multisport-hero.webp') }}" alt="{{ $event->title }}" style="width: 100%; height: 100%; object-fit: cover;">
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%); padding: 32px 24px;">
                             <span style="background: var(--lime); color: var(--bg); font-weight: 700; text-transform: uppercase; font-size: 11px; padding: 4px 10px; border-radius: 4px; display: inline-block; margin-bottom: 12px; letter-spacing: 0.05em;">
                                 {{ $event->sport }}

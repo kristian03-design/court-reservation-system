@@ -166,8 +166,27 @@
             </div>
 
             <div class="cf-field" style="margin-bottom:20px;">
-                <label class="cf-label" for="image" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600;">Cover Image</label>
-                <input id="image" type="file" name="image" class="cf-input @error('image') is-error @enderror" style="width:100%; background:var(--surface-3); border:1px solid var(--border); border-radius:8px; padding:8px; color:#fff; box-sizing:border-box; font-size:12px;">
+                <label class="cf-label" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600;">Cover Image</label>
+                
+                {{-- Drop Zone --}}
+                <div id="image-drop-zone" style="border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; background: var(--surface-3); cursor: pointer; transition: all 0.2s ease-in-out; position: relative;">
+                    {{-- Hidden input --}}
+                    <input id="image" type="file" name="image" class="cf-input @error('image') is-error @enderror" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
+                    
+                    <div id="drop-zone-prompt" style="pointer-events: none;">
+                        <i class="ti ti-upload" style="font-size: 32px; color: var(--lime); margin-bottom: 8px; display: block;"></i>
+                        <span style="font-size: 13px; color: #fff; font-weight: 500; display: block;">Drag & drop image here or click to browse</span>
+                        <span style="font-size: 11px; color: var(--muted); display: block; margin-top: 4px;">Supports PNG, JPG, WEBP (Max 4MB)</span>
+                    </div>
+
+                    {{-- Image Preview --}}
+                    <div id="image-preview-container" style="display: none; pointer-events: none; position: relative;">
+                        <img id="image-preview" src="" alt="Cover Preview" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border);">
+                        <div id="change-image-overlay" style="margin-top: 8px; font-size: 11px; color: var(--lime); font-weight: 600;">
+                            <i class="ti ti-replace" style="font-size: 12px; vertical-align: middle;"></i> Click or drag to replace image
+                        </div>
+                    </div>
+                </div>
                 @error('image')<span class="cf-error" style="color:#ef4444; font-size:11px; margin-top:4px; display:block;">{{ $message }}</span>@enderror
             </div>
 
@@ -198,4 +217,47 @@
         </div>
     </div>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const dropZone = document.getElementById('image-drop-zone');
+    const fileInput = document.getElementById('image');
+    const previewContainer = document.getElementById('image-preview-container');
+    const previewImg = document.getElementById('image-preview');
+    const promptDiv = document.getElementById('drop-zone-prompt');
+
+    if (dropZone && fileInput) {
+        // Drag events
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = 'var(--lime)';
+                dropZone.style.background = 'rgba(191,255,0,0.02)';
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = 'var(--border)';
+                dropZone.style.background = 'var(--surface-3)';
+            }, false);
+        });
+
+        // Handle file select/change
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    previewImg.src = event.target.result;
+                    promptDiv.style.display = 'none';
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
 @endsection

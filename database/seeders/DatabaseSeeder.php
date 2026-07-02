@@ -27,11 +27,11 @@ class DatabaseSeeder extends Seeder
         );
 
         $courts = collect([
-            ['court_name' => 'Peak Basketball Court', 'court_type' => 'Basketball', 'capacity' => 10, 'hourly_rate' => 950, 'image' => '/images/courtconnect-basketball-court.webp'],
-            ['court_name' => 'Velocity Volleyball Arena', 'court_type' => 'Volleyball', 'capacity' => 12, 'hourly_rate' => 850, 'image' => '/images/courtconnect-volleyball-court.webp'],
-            ['court_name' => 'Swift Badminton Hall', 'court_type' => 'Badminton', 'capacity' => 4, 'hourly_rate' => 420, 'image' => '/images/courtconnect-badminton-court.webp'],
-            ['court_name' => 'Baseline Tennis Court', 'court_type' => 'Tennis', 'capacity' => 4, 'hourly_rate' => 720, 'image' => '/images/courtconnect-tennis-court.webp'],
-            ['court_name' => 'Urban Futsal Pitch', 'court_type' => 'Futsal', 'capacity' => 10, 'hourly_rate' => 1100, 'image' => '/images/courtconnect-futsal-pitch.webp'],
+            ['court_name' => 'Peak Basketball Court', 'court_type' => 'Basketball', 'capacity' => 10, 'hourly_rate' => 950, 'image' => 'images/courtconnect-basketball-court.webp'],
+            ['court_name' => 'Velocity Volleyball Arena', 'court_type' => 'Volleyball', 'capacity' => 12, 'hourly_rate' => 850, 'image' => 'images/courtconnect-volleyball-court.webp'],
+            ['court_name' => 'Swift Badminton Hall', 'court_type' => 'Badminton', 'capacity' => 4, 'hourly_rate' => 420, 'image' => 'images/courtconnect-badminton-court.webp'],
+            ['court_name' => 'Baseline Tennis Court', 'court_type' => 'Tennis', 'capacity' => 4, 'hourly_rate' => 720, 'image' => 'images/courtconnect-tennis-court.webp'],
+            ['court_name' => 'Urban Futsal Pitch', 'court_type' => 'Futsal', 'capacity' => 10, 'hourly_rate' => 1100, 'image' => 'images/courtconnect-futsal-pitch.webp'],
         ])->map(function (array $court) {
             return Court::updateOrCreate(
                 ['court_name' => $court['court_name']],
