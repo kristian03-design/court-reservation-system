@@ -62,10 +62,31 @@ class CourtController extends Controller
             ->where('status', 'available')
             ->get();
 
-        $courtsWithSlots = $courts->map(function (Court $court) use ($date, $availabilityService) {
+        $courtIds = $courts->pluck('id');
+
+        // Fetch all reservations in a single query
+        $allReservations = \App\Models\Reservation::query()
+            ->whereIn('court_id', $courtIds)
+            ->whereDate('reservation_date', $date)
+            ->active()
+            ->get()
+            ->groupBy('court_id');
+
+        // Fetch all blocked schedules in a single query
+        $allBlockedSchedules = \App\Models\CourtSchedule::query()
+            ->whereIn('court_id', $courtIds)
+            ->whereDate('schedule_date', $date)
+            ->whereIn('availability_status', ['reserved', 'maintenance', 'closed'])
+            ->get()
+            ->groupBy('court_id');
+
+        $courtsWithSlots = $courts->map(function (Court $court) use ($date, $availabilityService, $allReservations, $allBlockedSchedules) {
+            $courtReservations = $allReservations->get($court->id, collect());
+            $courtSchedules = $allBlockedSchedules->get($court->id, collect());
+
             return [
                 'court' => $court,
-                'slots' => $availabilityService->dailySlots($court, $date),
+                'slots' => $availabilityService->dailySlots($court, $date, $courtReservations, $courtSchedules),
             ];
         });
 

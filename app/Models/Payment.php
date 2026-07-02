@@ -30,4 +30,15 @@ class Payment extends Model
     {
         return $this->belongsTo(Reservation::class);
     }
+
+    protected static function booted()
+    {
+        $invalidateCache = function () {
+            \Illuminate\Support\Facades\Cache::forget('admin_dashboard_stats');
+            \Illuminate\Support\Facades\Cache::forget('admin_reports_data');
+        };
+
+        static::saved($invalidateCache);
+        static::deleted($invalidateCache);
+    }
 }

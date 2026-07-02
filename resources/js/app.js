@@ -198,10 +198,7 @@ const dismissLoader = () => {
     }
 };
 
-window.addEventListener('load', () => {
-    // Add a slight delay so it doesn't flash instantly on fast connections
-    setTimeout(dismissLoader, 600);
-});
+window.addEventListener('load', dismissLoader);
 // Fallback timeout to guarantee page interaction after 2.5 seconds
 setTimeout(dismissLoader, 2500);
 

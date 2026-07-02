@@ -15,7 +15,7 @@ class ReportService
             'todays_reservations' => Reservation::whereDate('reservation_date', today())->count(),
             'active_courts' => Court::available()->count(),
             'revenue' => Payment::where('payment_status', 'paid')->sum('amount'),
-            'pending_reservations' => Reservation::where('status', 'pending')->count(),
+            'pending_reservations' => Reservation::where('status', 'pending_payment')->count(),
         ];
     }
 

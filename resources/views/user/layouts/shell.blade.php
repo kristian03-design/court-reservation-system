@@ -1,5 +1,5 @@
 @php
-    $logoCandidates = ['images/courtconnect-mark.png', 'images/courtconnect-logo.svg', 'images/courtconnect-logo.png', 'courtconnect-logo.svg', 'courtconnect-logo.png'];
+    $logoCandidates = ['images/courtconnect-mark.webp', 'images/courtconnect-logo.svg', 'images/courtconnect-logo.webp', 'courtconnect-logo.svg', 'courtconnect-logo.webp'];
     $layoutLogo = collect($logoCandidates)->first(fn ($path) => file_exists(public_path($path)));
     
     $navItems = [
@@ -34,7 +34,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $pageTitle ?? 'Player Dashboard' }} | CourtConnect</title>
-    <link rel="icon" href="{{ asset('images/courtconnect-mark.png') }}">
+    <link rel="icon" href="{{ asset('images/courtconnect-mark.webp') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">

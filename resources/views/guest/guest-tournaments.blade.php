@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Tournaments | CourtConnect</title>
-    <link rel="icon" href="{{ asset('images/courtconnect-mark.png') }}">
+    <link rel="icon" href="{{ asset('images/courtconnect-mark.webp') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -43,7 +43,7 @@
                     {{-- Tournament 1 --}}
                     <article class="cc-court-card scroll-reveal reveal-fade-up stagger-1">
                         <div class="cc-court-image">
-                            <img src="{{ asset('images/courtconnect-multisport-hero.png') }}" alt="Badminton Open" style="filter: brightness(0.65) saturate(0.85);">
+                            <img src="{{ asset('images/courtconnect-multisport-hero.webp') }}" alt="Badminton Open" style="filter: brightness(0.65) saturate(0.85);">
                             <span class="sport-badge" style="background: var(--lime); color: var(--bg);">Badminton</span>
                         </div>
                         <div class="cc-court-body" style="gap: 12px; padding: 24px;">
@@ -66,7 +66,7 @@
                     {{-- Tournament 2 --}}
                     <article class="cc-court-card scroll-reveal reveal-fade-up stagger-2">
                         <div class="cc-court-image">
-                            <img src="{{ asset('images/courtconnect-multisport-hero.png') }}" alt="Futsal Champions Cup" style="filter: brightness(0.65) saturate(0.85);">
+                            <img src="{{ asset('images/courtconnect-multisport-hero.webp') }}" alt="Futsal Champions Cup" style="filter: brightness(0.65) saturate(0.85);">
                             <span class="sport-badge" style="background: var(--lime); color: var(--bg);">Futsal</span>
                         </div>
                         <div class="cc-court-body" style="gap: 12px; padding: 24px;">
@@ -89,7 +89,7 @@
                     {{-- Tournament 3 --}}
                     <article class="cc-court-card scroll-reveal reveal-fade-up stagger-3">
                         <div class="cc-court-image">
-                            <img src="{{ asset('images/courtconnect-multisport-hero.png') }}" alt="HoopFest 3v3" style="filter: brightness(0.4) saturate(0.7);">
+                            <img src="{{ asset('images/courtconnect-multisport-hero.webp') }}" alt="HoopFest 3v3" style="filter: brightness(0.4) saturate(0.7);">
                             <span class="sport-badge" style="background: var(--lime); color: var(--bg);">Basketball</span>
                         </div>
                         <div class="cc-court-body" style="gap: 12px; padding: 24px;">

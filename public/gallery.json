@@ -1,31 +1,31 @@
 {
     "basketball": [
-        "images/courtconnect-basketball-court.png",
-        "images/basketball-angle-2.png",
-        "images/basketball-corner.png",
-        "images/basketball-center.png",
-        "images/basketball-low.png",
-        "images/basketball-balcony.png",
-        "images/basketball-behind.png",
-        "images/basketball-pov.png",
-        "images/basketball-entrance.png",
-        "images/basketball-full.png"
+        "images/courtconnect-basketball-court.webp",
+        "images/basketball-angle-2.webp",
+        "images/basketball-corner.webp",
+        "images/basketball-center.webp",
+        "images/basketball-low.webp",
+        "images/basketball-balcony.webp",
+        "images/basketball-behind.webp",
+        "images/basketball-pov.webp",
+        "images/basketball-entrance.webp",
+        "images/basketball-full.webp"
     ],
     "futsal": [
-        "images/courtconnect-futsal-pitch.png"
+        "images/courtconnect-futsal-pitch.webp"
     ],
     "volleyball": [
-        "images/courtconnect-volleyball-court.png",
-        "images/volleyball-angle-1.png",
-        "images/volleyball-angle-2.png"
+        "images/courtconnect-volleyball-court.webp",
+        "images/volleyball-angle-1.webp",
+        "images/volleyball-angle-2.webp"
     ],
     "badminton": [
-        "images/courtconnect-badminton-court.png",
-        "images/badminton-angle-2.png"
+        "images/courtconnect-badminton-court.webp",
+        "images/badminton-angle-2.webp"
     ],
     "tennis": [
-        "images/courtconnect-tennis-court.png",
-        "images/tennis-angle-1.png",
-        "images/courtconnect-booking-lounge.png"
+        "images/courtconnect-tennis-court.webp",
+        "images/tennis-angle-1.webp",
+        "images/courtconnect-booking-lounge.webp"
     ]
 }

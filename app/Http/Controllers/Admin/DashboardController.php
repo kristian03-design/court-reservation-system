@@ -11,16 +11,23 @@ class DashboardController extends Controller
 {
     public function __invoke(ReportService $reportService): View
     {
-        $courts = \App\Models\Court::with(['reservations' => function ($q) {
-            $q->whereDate('reservation_date', today())
-              ->whereIn('status', ['approved', 'completed', 'pending']);
-        }])->get();
+        $cachedData = \Illuminate\Support\Facades\Cache::remember('admin_dashboard_stats', 3600, function () use ($reportService) {
+            $courts = \App\Models\Court::with(['reservations' => function ($q) {
+                $q->whereDate('reservation_date', today())
+                  ->whereIn('status', ['confirmed', 'completed', 'pending_payment']);
+            }])->get();
 
-        return view('admin.admin-dashboard', [
-            'stats' => $reportService->dashboardStats(),
-            'statusBreakdown' => $reportService->bookingStatus(),
-            'recentReservations' => Reservation::with(['court', 'user', 'payment'])->latest()->take(8)->get(),
-            'courts' => $courts,
-        ]);
+            return [
+                'stats' => $reportService->dashboardStats(),
+                'statusBreakdown' => $reportService->bookingStatus(),
+                'courts' => $courts,
+            ];
+        });
+
+        $recentReservations = Reservation::with(['court', 'user', 'payment'])->latest()->take(8)->get();
+
+        return view('admin.admin-dashboard', array_merge($cachedData, [
+            'recentReservations' => $recentReservations,
+        ]));
     }
 }

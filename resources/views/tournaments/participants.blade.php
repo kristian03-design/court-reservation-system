@@ -602,7 +602,6 @@
 
     @include('partials.public-footer')
 
-    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         const tournamentId = parseInt("{{ $tournament->id }}", 10);
         const bracketUrl = "{{ route('tournaments.show', $tournament) }}?tab=bracket";

@@ -38,10 +38,16 @@ class Court extends Model
         return $this->hasMany(CourtSchedule::class);
     }
 
+    protected ?bool $isOccupiedNowMemo = null;
+
     public function isOccupiedNow(): bool
     {
+        if ($this->isOccupiedNowMemo !== null) {
+            return $this->isOccupiedNowMemo;
+        }
+
         if ($this->status !== 'available') {
-            return true;
+            return $this->isOccupiedNowMemo = true;
         }
 
         $now = now();
@@ -56,10 +62,10 @@ class Court extends Model
             ->exists();
 
         if ($blockedSchedule) {
-            return true;
+            return $this->isOccupiedNowMemo = true;
         }
 
-        return $this->reservations()
+        return $this->isOccupiedNowMemo = $this->reservations()
             ->whereDate('reservation_date', $date)
             ->active()
             ->where('start_time', '<=', $time)
@@ -74,12 +80,15 @@ class Court extends Model
 
     protected static function booted()
     {
-        static::saved(function () {
-            \Illuminate\Support\Facades\Cache::flush();
-        });
+        $invalidateCache = function () {
+            \Illuminate\Support\Facades\Cache::forget('admin_dashboard_stats');
+            \Illuminate\Support\Facades\Cache::forget('admin_reports_data');
+            for ($i = 1; $i <= 5; $i++) {
+                \Illuminate\Support\Facades\Cache::forget("courts_list_page_{$i}");
+            }
+        };
 
-        static::deleted(function () {
-            \Illuminate\Support\Facades\Cache::flush();
-        });
+        static::saved($invalidateCache);
+        static::deleted($invalidateCache);
     }
 }

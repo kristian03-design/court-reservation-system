@@ -37,21 +37,21 @@ class AvailabilityService
             ->exists();
     }
 
-    public function dailySlots(Court $court, string $date): array
+    public function dailySlots(Court $court, string $date, $preloadedReservations = null, $preloadedSchedules = null): array
     {
         $slots = [];
         $cursor = Carbon::parse($date.' 08:00');
         $close = Carbon::parse($date.' 22:00');
 
-        // Pre-fetch active reservations for this court on this date
-        $reservations = Reservation::query()
+        // Pre-fetch active reservations for this court on this date if not provided
+        $reservations = $preloadedReservations ?? Reservation::query()
             ->where('court_id', $court->id)
             ->whereDate('reservation_date', $date)
             ->active()
             ->get();
 
-        // Pre-fetch blocked schedules
-        $blockedSchedules = CourtSchedule::query()
+        // Pre-fetch blocked schedules if not provided
+        $blockedSchedules = $preloadedSchedules ?? CourtSchedule::query()
             ->where('court_id', $court->id)
             ->whereDate('schedule_date', $date)
             ->whereIn('availability_status', ['reserved', 'maintenance', 'closed'])

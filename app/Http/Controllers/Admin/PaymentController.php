@@ -63,18 +63,36 @@ class PaymentController extends Controller
         }
     }
 
-    public function showProof(Payment $payment): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    public function showProof(Payment $payment): \Symfony\Component\HttpFoundation\Response
     {
         if (!$payment->proof_image) {
             abort(404);
         }
 
-        $path = \Illuminate\Support\Facades\Storage::disk('local')->path($payment->proof_image);
+        $diskName = config('filesystems.default');
+        $disk = \Illuminate\Support\Facades\Storage::disk($diskName);
 
-        if (!file_exists($path)) {
+        if ($diskName === 'local') {
+            $path = $disk->path($payment->proof_image);
+            if (!file_exists($path)) {
+                abort(404);
+            }
+            return response()->file($path);
+        }
+
+        if (!$disk->exists($payment->proof_image)) {
             abort(404);
         }
 
-        return response()->file($path);
+        return response()->stream(function () use ($disk, $payment) {
+            $stream = $disk->readStream($payment->proof_image);
+            fpassthru($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }, 200, [
+            'Content-Type' => $disk->mimeType($payment->proof_image),
+            'Content-Disposition' => 'inline; filename="' . basename($payment->proof_image) . '"',
+        ]);
     }
 }

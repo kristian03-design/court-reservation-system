@@ -156,7 +156,6 @@
     </main>
 
     @include('partials.public-footer')
-    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         lucide.createIcons();
 

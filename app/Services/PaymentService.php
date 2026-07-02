@@ -20,8 +20,9 @@ class PaymentService
         $uuid = (string) \Illuminate\Support\Str::uuid();
         $filename = "{$uuid}.{$extension}";
 
-        // Store in private 'local' disk instead of 'public'
-        $path = $file->storeAs('payment-proofs', $filename, 'local');
+        // Store in default filesystem disk
+        $diskName = config('filesystems.default');
+        $path = $file->storeAs('payment-proofs', $filename, $diskName);
 
         $payment->update([
             'proof_image' => $path,

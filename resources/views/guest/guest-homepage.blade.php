@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="CourtConnect — Book badminton, tennis, basketball and futsal courts online. Browse live availability and reserve your slot instantly.">
     <title>CourtConnect — Book Your Court. Own Your Game.</title>
-    <link rel="icon" href="{{ asset('images/courtconnect-mark.png') }}">
+    <link rel="icon" href="{{ asset('images/courtconnect-mark.webp') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,7 +21,7 @@
         {{-- ═══════════════════════ HERO ═══════════════════════ --}}
         <section class="cc-hero" id="availability">
             <div class="cc-hero-bg">
-                <img src="{{ asset('images/courtconnect-badminton-court.png') }}" alt="Premium indoor court">
+                <img src="{{ asset('images/courtconnect-badminton-court.webp') }}" alt="Premium indoor court">
             </div>
             <div class="site-container cc-hero-grid">
                 <div class="scroll-reveal reveal-fade-up">
@@ -163,7 +163,7 @@
                     @foreach ($courts->take(3) as $court)
                         <article class="cc-court-card scroll-reveal reveal-fade-up stagger-{{ $loop->iteration }}">
                             <a href="{{ route('courts.show', $court) }}" class="cc-court-image">
-                                <img src="{{ $court->image ?: asset('images/courtconnect-multisport-hero.png') }}" alt="{{ $court->court_name }}">
+                                <img src="{{ $court->image ?: asset('images/courtconnect-multisport-hero.webp') }}" alt="{{ $court->court_name }}">
                                 @if ($court->status === 'available')
                                     <span class="sport-badge">{{ $court->court_type }}</span>
                                 @else

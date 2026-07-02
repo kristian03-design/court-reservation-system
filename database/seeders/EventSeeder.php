@@ -28,7 +28,7 @@ class EventSeeder extends Seeder
                 'sport' => 'Social Play',
                 'event_type' => 'Weekly Session',
                 'description' => 'Show up solo or with friends. We organize casual matches and connect you with players of similar skill levels. Perfect for networking, scrimmage sessions, and community play.',
-                'image' => 'images/courtconnect-multisport-hero.png',
+                'image' => 'images/courtconnect-multisport-hero.webp',
                 'price' => 150.00,
                 'max_slots' => 48,
                 'registered' => 0,
@@ -50,7 +50,7 @@ class EventSeeder extends Seeder
                 'sport' => 'Tennis',
                 'event_type' => 'Skills Clinic',
                 'description' => 'Master positioning, defensive returns, and advanced volley techniques through guided sessions with experienced coaches.',
-                'image' => 'images/courtconnect-tennis-court.png',
+                'image' => 'images/courtconnect-tennis-court.webp',
                 'price' => 500.00,
                 'max_slots' => 20,
                 'registered' => 0,
@@ -72,7 +72,7 @@ class EventSeeder extends Seeder
                 'sport' => 'Basketball',
                 'event_type' => 'Training Camp',
                 'description' => 'Comprehensive developmental basketball program for ages 8–15 focusing on shooting, dribbling, team play, and court awareness.',
-                'image' => 'images/courtconnect-basketball-court.png',
+                'image' => 'images/courtconnect-basketball-court.webp',
                 'price' => 2500.00,
                 'max_slots' => 40,
                 'registered' => 0,
@@ -94,7 +94,7 @@ class EventSeeder extends Seeder
                 'sport' => 'Padel',
                 'event_type' => 'Open Play',
                 'description' => 'Evening social and competitive matches with rotating opponents.',
-                'image' => 'images/courtconnect-padele-hero.png',
+                'image' => 'images/courtconnect-padele-hero.webp',
                 'price' => 300.00,
                 'max_slots' => 32,
                 'registered' => 0,
@@ -116,7 +116,7 @@ class EventSeeder extends Seeder
                 'sport' => 'Basketball',
                 'event_type' => 'League',
                 'description' => 'Season-based league with standings and playoffs.',
-                'image' => 'images/courtconnect-basketball-court.png',
+                'image' => 'images/courtconnect-basketball-court.webp',
                 'price' => 1000.00,
                 'max_slots' => 64,
                 'registered' => 0,
@@ -187,7 +187,7 @@ class EventSeeder extends Seeder
                     'payment_status' => $payStatus,
                     'registration_status' => $regStatus,
                     'payment_method' => $method,
-                    'proof_image' => $method === 'gcash' ? 'images/courtconnect-mark.png' : null, // mock proof image
+                    'proof_image' => $method === 'gcash' ? 'images/courtconnect-mark.webp' : null, // mock proof image
                     'reference_number' => $method === 'gcash' ? 'GCASH-REF-' . rand(100000, 999999) : null,
                 ]);
             }

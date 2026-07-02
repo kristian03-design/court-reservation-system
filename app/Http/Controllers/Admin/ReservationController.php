@@ -61,21 +61,28 @@ class ReservationController extends Controller
         return back()->with('success', 'Reservation status updated.');
     }
 
-    public function calendar(): JsonResponse
+    public function calendar(Request $request): JsonResponse
     {
+        $start = $request->query('start');
+        $end = $request->query('end');
+
         return response()->json(
-            Reservation::with('court')->get()->map(fn ($reservation) => [
-                'id' => $reservation->id,
-                'title' => $reservation->court->court_name.' - '.$reservation->status,
-                'start' => $reservation->reservation_date->toDateString().'T'.$reservation->start_time,
-                'end' => $reservation->reservation_date->toDateString().'T'.$reservation->end_time,
-                'color' => match ($reservation->status) {
-                    'confirmed' => '#22C55E',
-                    'cancelled', 'expired' => '#EF4444',
-                    'completed' => '#3B82F6',
-                    default => '#F59E0B',
-                },
-            ])
+            Reservation::with('court')
+                ->when($start, fn ($q) => $q->whereDate('reservation_date', '>=', \Illuminate\Support\Carbon::parse($start)->toDateString()))
+                ->when($end, fn ($q) => $q->whereDate('reservation_date', '<=', \Illuminate\Support\Carbon::parse($end)->toDateString()))
+                ->get()
+                ->map(fn ($reservation) => [
+                    'id' => $reservation->id,
+                    'title' => $reservation->court->court_name.' - '.$reservation->status,
+                    'start' => $reservation->reservation_date->toDateString().'T'.$reservation->start_time,
+                    'end' => $reservation->reservation_date->toDateString().'T'.$reservation->end_time,
+                    'color' => match ($reservation->status) {
+                        'confirmed' => '#22C55E',
+                        'cancelled', 'expired' => '#EF4444',
+                        'completed' => '#3B82F6',
+                        default => '#F59E0B',
+                    },
+                ])
         );
     }
 

@@ -1,10 +1,10 @@
 @php
     $logoCandidates = [
-        'images/courtconnect-mark.png',
+        'images/courtconnect-mark.webp',
         'images/courtconnect-logo.svg',
-        'images/courtconnect-logo.png',
+        'images/courtconnect-logo.webp',
         'courtconnect-logo.svg',
-        'courtconnect-logo.png',
+        'courtconnect-logo.webp',
     ];
     $layoutLogo = collect($logoCandidates)->first(fn ($p) => file_exists(public_path($p)));
 
@@ -35,7 +35,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $pageTitle }} | CourtConnect</title>
-    <link rel="icon" href="{{ asset('images/courtconnect-mark.png') }}">
+    <link rel="icon" href="{{ asset('images/courtconnect-mark.webp') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
