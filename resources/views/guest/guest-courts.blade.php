@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="Browse available courts — badminton, tennis, basketball, futsal. Filter by sport type, price, and availability.">
     <title>Courts | CourtConnect</title>
-    <link rel="icon" href="{{ asset('images/courtconnect-mark.png') }}">
+    <link rel="icon" href="{{ asset('images/courtconnect-mark.webp') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
