@@ -22,9 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $middleware->alias([
-            'role' => \App\Http\Middleware\EnsureRole::class,
-            'redirect.admin' => \App\Http\Middleware\RedirectAdmin::class,
-            'signature' => \App\Http\Middleware\VerifyRequestSignature::class,
+            'role'          => \App\Http\Middleware\EnsureRole::class,
+            'redirect.admin'=> \App\Http\Middleware\RedirectAdmin::class,
+            'signature'     => \App\Http\Middleware\VerifyRequestSignature::class,
+            'jwt.auth'      => \App\Http\Middleware\JwtAuthenticate::class,
+            'jwt.role'      => \App\Http\Middleware\CheckApiRole::class,
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\SecureHeaders::class,
