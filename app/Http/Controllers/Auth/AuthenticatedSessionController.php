@@ -117,11 +117,16 @@ class AuthenticatedSessionController extends Controller
         $otp = (string) random_int(100000, 999999);
 
         try {
-            Mail::raw(
-                "Your CourtConnect admin OTP is {$otp}. This code expires in 10 minutes.",
+            $htmlBody = view('emails.admin-otp', [
+                'otp'        => $otp,
+                'adminEmail' => $admin->email,
+            ])->render();
+
+            Mail::html(
+                $htmlBody,
                 function ($message) use ($admin) {
                     $message->to($admin->email)
-                        ->subject('CourtConnect Admin OTP');
+                        ->subject('CourtConnect — Admin Login Code');
                 }
             );
         } catch (Throwable $exception) {

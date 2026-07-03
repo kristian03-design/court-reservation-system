@@ -8,9 +8,11 @@ use App\Models\EventRegistration;
 use App\Models\Court;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
@@ -96,12 +98,9 @@ class EventController extends Controller
         }
         $validated['slug'] = $slug;
 
-        // Image upload — use Storage::disk('public') so it works on Vercel (read-only public_path)
+        // Image upload
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('events', $fileName, 'public');
-            $validated['image'] = 'storage/' . $path;
+            $validated['image'] = $this->uploadEventImage($request->file('image'));
         }
 
         $event = Event::create($validated);
@@ -158,15 +157,7 @@ class EventController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            // Delete old public image if exists
-            if ($event->image) {
-                $oldPath = ltrim(str_replace('storage/', '', $event->image), '/');
-                Storage::disk('public')->delete($oldPath);
-            }
-            $file = $request->file('image');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('events', $fileName, 'public');
-            $validated['image'] = 'storage/' . $path;
+            $validated['image'] = $this->uploadEventImage($request->file('image'), $event->image);
         }
 
         $event->update($validated);
@@ -280,5 +271,63 @@ class EventController extends Controller
                 'is_read' => false,
             ]);
         }
+    }
+
+    /**
+     * Upload an event image.
+     * On Vercel (read-only filesystem), uploads to Supabase Storage via S3-compatible API.
+     * In local dev (no S3 credentials), stores to local public storage.
+     *
+     * @param  UploadedFile  $file
+     * @param  string|null   $oldImagePath  Path of the old image to delete (optional)
+     * @return string  The stored image path/URL to save in the database
+     */
+    private function uploadEventImage(UploadedFile $file, ?string $oldImagePath = null): string
+    {
+        $s3Key    = config('services.supabase.s3_key');
+        $s3Secret = config('services.supabase.s3_secret');
+        $s3Url    = config('services.supabase.s3_endpoint');
+        $bucket   = config('services.supabase.bucket', 'courtconnect-uploads');
+
+        $ext      = $file->getClientOriginalExtension();
+        $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $ext;
+        $s3Path   = 'events/' . $fileName;
+
+        if ($s3Key && $s3Secret && $s3Url) {
+            // --- Supabase S3-compatible Storage (production / Vercel) ---
+            config([
+                'filesystems.disks.supabase_s3.driver'                  => 's3',
+                'filesystems.disks.supabase_s3.key'                     => $s3Key,
+                'filesystems.disks.supabase_s3.secret'                  => $s3Secret,
+                'filesystems.disks.supabase_s3.region'                  => config('services.supabase.s3_region', 'ap-southeast-1'),
+                'filesystems.disks.supabase_s3.bucket'                  => $bucket,
+                'filesystems.disks.supabase_s3.endpoint'                => $s3Url,
+                'filesystems.disks.supabase_s3.use_path_style_endpoint' => true,
+                'filesystems.disks.supabase_s3.throw'                   => false,
+            ]);
+
+            $disk = Storage::disk('supabase_s3');
+
+            // Delete old file if it was previously in Supabase
+            if ($oldImagePath && Str::startsWith($oldImagePath, 'https://')) {
+                $oldKey = preg_replace('#^.*/events/#', 'events/', $oldImagePath);
+                try { $disk->delete($oldKey); } catch (\Throwable) {}
+            }
+
+            $uploaded = $disk->put($s3Path, file_get_contents($file->getRealPath()), 'public');
+
+            if ($uploaded) {
+                $supabasePublicUrl = config('services.supabase.url');
+                return "{$supabasePublicUrl}/storage/v1/object/public/{$bucket}/{$s3Path}";
+            }
+        }
+
+        // --- Local storage fallback (development) ---
+        if ($oldImagePath && !Str::startsWith($oldImagePath, 'https://')) {
+            $oldLocal = ltrim(str_replace('storage/', '', $oldImagePath), '/');
+            Storage::disk('public')->delete($oldLocal);
+        }
+        $path = $file->storeAs('events', $fileName, 'public');
+        return 'storage/' . $path;
     }
 }

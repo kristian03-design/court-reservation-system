@@ -19,7 +19,10 @@
     "APP_EVENTS_CACHE": "/tmp/events.php",
     "APP_PACKAGES_CACHE": "/tmp/packages.php",
     "APP_ROUTES_CACHE": "/tmp/routes.php",
-    "APP_SERVICES_CACHE": "/tmp/services.php"
+    "APP_SERVICES_CACHE": "/tmp/services.php",
+    "SUPABASE_URL": "https://gcmodcwrdfclctgigkdg.supabase.co",
+    "SUPABASE_SERVICE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdjb W9kY3dyZGZjbGN0Z2lna2RnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDkxNDQ5MiwiZXhwIjoyMDY2NDkwNDkyfQ.supabase_service_key_placeholder",
+    "SUPABASE_BUCKET": "courtconnect-uploads"
   },
   "headers": [
     {
