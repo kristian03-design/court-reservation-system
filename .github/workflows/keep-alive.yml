@@ -2,16 +2,41 @@ name: Keep Supabase Active
 
 on:
   schedule:
-    # Runs at 12:00 UTC on Mondays and Thursdays (every ~3 days)
-    - cron: '0 12 * * 1,4'
-  workflow_dispatch: # Allows you to run it manually from the Actions tab
+    # Runs twice daily at 00:00 and 12:00 UTC to prevent Supabase auto-pausing
+    - cron: '0 0,12 * * *'
+  workflow_dispatch: # Allows manual triggering from GitHub Actions tab
 
 jobs:
-  ping:
+  keep-alive:
     runs-on: ubuntu-latest
     steps:
-      - name: Query Supabase API
+      - name: Direct PostgreSQL Database Query
+        env:
+          DB_HOST: ${{ secrets.DB_HOST || 'aws-1-ap-southeast-1.pooler.supabase.com' }}
+          DB_PORT: ${{ secrets.DB_PORT || '6543' }}
+          DB_NAME: ${{ secrets.DB_DATABASE || 'postgres' }}
+          DB_USER: ${{ secrets.DB_USERNAME || 'postgres.gcmodcwrdfclctgigkdg' }}
+          DB_PASS: ${{ secrets.DB_PASSWORD || 'courtconnect2026' }}
         run: |
-          curl -X GET "https://gcmodcwrdfclctgigkdg.supabase.co/rest/v1/events?select=id&limit=1" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+          echo "Installing PostgreSQL client..."
+          sudo apt-get update -qq && sudo apt-get install -y postgresql-client
+          echo "Executing keep-alive SQL query on Supabase..."
+          PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "SELECT 1 AS keep_alive_ping;"
+
+      - name: Query Supabase REST & Health Endpoints
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://gcmodcwrdfclctgigkdg.supabase.co' }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          echo "Pinging Supabase Auth Health Endpoint..."
+          curl -s "${SUPABASE_URL}/auth/v1/health" || true
+
+          echo "Pinging Supabase REST API Root..."
+          curl -s "${SUPABASE_URL}/rest/v1/" || true
+
+          if [ -n "$SUPABASE_ANON_KEY" ]; then
+            echo "Querying Supabase API table..."
+            curl -s "${SUPABASE_URL}/rest/v1/events?select=id&limit=1" \
+              -H "apikey: ${SUPABASE_ANON_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" || true
+          fi
